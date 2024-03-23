@@ -12,7 +12,7 @@ To complement the value proposition, we tried to illustrate the user experience 
 ![user experience sketch](./docs/UX-sketch.jpeg "Userexperience sketch")
 
 ### Architecture
-Work in progress
+![architecture sketch](./docs/arch-sketch.png "Architecture sketch")
 
 ### Roadmap
 Work in progress
