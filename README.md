@@ -15,7 +15,23 @@ To complement the value proposition, we tried to illustrate the user experience 
 ![architecture sketch](./docs/arch-sketch.png "Architecture sketch")
 
 ### Roadmap
-Work in progress
+
+#### Phase 1: Initial Setup - 07.04
+- **Requirement Analysis**
+- **Microservice Architecture Planning**
+- **TensorFlow (TF) Setup**
+
+#### Phase 2: Core Development - 31.05
+- **Persistence Service Development**
+- **Model Serving Service Development**
+- **Gateway Service Development**
+- **Frontend (FE) Development**
+- **Kubernetes Pod Spawning and Scaling Setup**
+
+#### Phase 3: Integration and Testing - 15.06
+- **Microservices Integration**
+- **System Testing**
+
 
 ### Budget Estimation
 
