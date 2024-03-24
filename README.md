@@ -17,7 +17,21 @@ To complement the value proposition, we tried to illustrate the user experience 
 ### Roadmap
 Work in progress
 
-### Budget
-Work in progress
+### Budget Estimation
+
+# Microsoft Azure Estimate
+
+| Service category | Service type              | Custom name | Region      | Description                                                                                                                                                                                                                                                                                                         | Estimated monthly cost | Estimated upfront cost |
+|------------------|---------------------------|-------------|-------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------:|-----------------------:|
+| Compute          | Azure Kubernetes Service (AKS) |             | West Europe | Kostenlos (nicht für Produktionsumgebungen); Die Clusterverwaltung ist kostenlos.; 2 A2 v2 (2 vCPUs, 4 GB RAM) x 730 Stunden (Nutzungsbasierte Bezahlung), Linux; 0 verwaltete Betriebssystemdatenträger – E1                                                                                                          | €115.55                | €0.00                  |
+| Speicher         | Storage Accounts          |             | West Europe | Block Blob Storage, Allgemein v2, Hierarchischer Namespace, LRS Redundanz, Zugriffsebene: Heiß, Kapazität: 1.000 GB - Nutzungsbasierte Bezahlung, 10 x 10 000 Schreibvorgänge, 10 x 10 000 Lesevorgänge, 10 x 10 000 iterative Lesevorgänge, 10 x 100 iterative Schreibvorgänge, 1.000GB Datenabruf, 1.000GB Datenschreibvorgänge, SFTP deaktiviert, 1.000 GB Index, 1 x 10 000 Andere Vorgänge | €45.56                 | €0.00                  |
+|                  | **Total**                 |             |             |                                                                                                                                                                                                                                                                                                                     | **€161.11**            | €0.00                  |
+
+---
+
+#### Disclaimer
+
+This estimate was created at 3/24/2024 9:36:07 AM UTC.
+
 
 
