@@ -64,9 +64,9 @@ jobs:
           load: true
           context: ./service/persistence
           file: ./service/persistence/Dockerfile
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           labels: ${{ steps.meta.outputs.labels }}
-          
+
       # -
       #   name: Scan for vulnerabilities
       #   id: scan
