@@ -64,9 +64,8 @@ jobs:
           load: true
           context: ./service/persistence
           file: ./service/persistence/Dockerfile
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-
       # -
       #   name: Scan for vulnerabilities
       #   id: scan
@@ -79,7 +78,7 @@ jobs:
         name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.18.0
         with:
-          image-ref: '${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}'
+          image-ref: '${{ steps.meta.outputs.tags }}'
           format: 'sarif'
           output: 'trivy-results.sarif'
           #exit-code: '1'
