@@ -65,6 +65,8 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image: ${{ steps.meta.outputs.tags }}
+          format: 'table'
+          output: 'stdout'
           dockerfile: ./service/persistence/Dockerfile
 
       -
