@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - main
-      - features/backend
+      - features/frontend
   pull_request:
 
 env:
