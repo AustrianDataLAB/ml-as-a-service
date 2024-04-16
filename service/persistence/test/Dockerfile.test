@@ -1,0 +1,16 @@
+FROM alpine:latest AS tester
+
+RUN apk add --no-cache bash
+RUN apk add --no-cache curl
+
+COPY . /usr/src/app
+WORKDIR /usr/src/app
+
+RUN chmod +x ./script.sh
+
+# this is used for debugging in combination with 
+# docker exec -it <conatiner-id> bash
+#RUN ["bash","./script.sh"]
+#CMD ["tail", "-f", "/dev/null"]
+
+CMD ["bash","./script.sh"]

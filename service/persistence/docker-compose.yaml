@@ -1,0 +1,26 @@
+version: '2'
+services:
+  persistence-service:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "1919:5000" # this doesnt affect the ports within the docker network
+    networks:
+      - test_network
+
+  test-client:
+    build:
+      context: ./test
+      dockerfile: ./Dockerfile.test
+    depends_on:
+      - persistence-service
+    environment:
+      - PERSISTENCE_SERVICE_URL=http://persistence-service:5000
+      - AUTH_TOKEN=asoijkudhfglaskldf-101234
+    networks:
+      - test_network
+
+networks:
+  test_network:
+    driver: bridge
