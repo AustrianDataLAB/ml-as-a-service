@@ -1,8 +1,8 @@
-# Use Alpine for the builder stage
-FROM alpine:latest as builder
+# Use Alpine latest version as the base image
+FROM alpine:latest
 
-# Install Python and pip
-RUN apk add --no-cache python3 py3-pip
+# Install Python, pip, and necessary build tools
+RUN apk add --no-cache python3 py3-pip python3-dev gcc musl-dev
 
 # Set the working directory in the container
 WORKDIR /app
@@ -11,22 +11,10 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Install Python dependencies
-RUN pip install -r requirements.txt --user
+RUN pip3 install -r requirements.txt
 
-# Start a new stage from scratch using Alpine
-FROM alpine:latest
-
-# Install Python
-RUN apk add --no-cache python3
-
-# Set the working directory in the container
-WORKDIR /app
-
-# Copy the installed Python packages from the builder stage
-COPY --from=builder /root/.local/lib/python3.10/site-packages /usr/lib/python3.10/site-packages
-
-# Copy the main application
+# Copy the rest of your application
 COPY main.py .
 
 # Set the entry point for the container
-ENTRYPOINT [ "python3", "/app/main.py" ]
+ENTRYPOINT ["python3", "/app/main.py"]
