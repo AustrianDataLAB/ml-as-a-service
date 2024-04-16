@@ -9,7 +9,7 @@ on:
 #  schedule:
 #    - cron: '40 16 * * *'
   push:
-    branches: [ "feature/persistence-service" ]
+    branches: [ "feature/persistence-service-test" ]
     # Publish semver tags as releases.
     #tags: [ 'v*.*.*' ]
   pull_request:
