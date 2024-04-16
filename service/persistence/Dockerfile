@@ -1,23 +1,32 @@
-FROM cgr.dev/chainguard/python:latest-dev as builder
+# Use Alpine for the builder stage
+FROM alpine:latest as builder
 
+# Install Python and pip
+RUN apk add --no-cache python3 py3-pip
+
+# Set the working directory in the container
 WORKDIR /app
 
+# Copy the requirements file
 COPY requirements.txt .
 
+# Install Python dependencies
 RUN pip install -r requirements.txt --user
 
+# Start a new stage from scratch using Alpine
+FROM alpine:latest
 
+# Install Python
+RUN apk add --no-cache python3
 
-
-
-FROM cgr.dev/chainguard/python:latest
-
+# Set the working directory in the container
 WORKDIR /app
 
-# Make sure you update Python version in path
-COPY --from=builder /home/nonroot/.local/lib/python3.12/site-packages /home/nonroot/.local/lib/python3.12/site-packages
+# Copy the installed Python packages from the builder stage
+COPY --from=builder /root/.local/lib/python3.10/site-packages /usr/lib/python3.10/site-packages
 
+# Copy the main application
 COPY main.py .
 
-ENTRYPOINT [ "python", "/app/main.py" ]
-
+# Set the entry point for the container
+ENTRYPOINT [ "python3", "/app/main.py" ]
