@@ -16,14 +16,12 @@ RUN pip install -r test/requirements.txt --user
 # Install service requirements
 RUN pip install -r requirements.txt --user
 
-# Copy test files
-COPY test/*.py test/
+COPY test/persistence-test.py test/
+COPY test/__init__.py test/__init__.py
 
-# Copy service files
-COPY *.py .
-
+COPY main.py .
+COPY __init__.py .
 
 WORKDIR /app/test
-
 #CMD ["tail", "-f", "/dev/null"]
 CMD ["python3", "-m", "pytest", "persistence-test.py"]

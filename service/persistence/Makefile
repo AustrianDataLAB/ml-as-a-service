@@ -27,4 +27,4 @@ down:
 	docker-compose down --remove-orphans
 
 test: 
-	docker-compose -f docker-compose.yaml run --build test 
+	docker-compose -f docker-compose.yaml run test 
