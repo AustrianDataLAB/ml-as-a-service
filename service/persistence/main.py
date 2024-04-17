@@ -1,7 +1,7 @@
 import os
 import sys
 import hashlib
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, jsonify
 
 app = Flask(__name__)
 
@@ -30,12 +30,14 @@ def get_userdir(request):
 @app.route('/data', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
-        return 'No file part'
+        print("No file found in request", file=sys.stderr)
+        return jsonify({"error": "No file provided"}), 400
 
     file = request.files['file']
 
     if file.filename == '':
-        return 'No selected file'
+        print("File is empty", file=sys.stderr)
+        return jsonify({"error": "File is empty"}), 400
     
     user_dir = get_userdir(request)
     
@@ -68,14 +70,24 @@ def hello_world():
 
 @app.before_request
 def enforce_auth_header():
-    print('AUTH-HEADER:'+str(request.headers.get('Authorization')), file=sys.stderr)
+    #print('AUTH-HEADER:'+str(request.headers.get('Authorization')), file=sys.stderr)
     #omit for hello world - this might be interesting for heatbeat
     if request.path == '/':
         return
     
     if not request.headers.get('Authorization'):
         #optionally redirect here?
-        return 'No Authorization header found'
+        return jsonify({"error": "Authorization header is missing"}), 401
+    
+    # validate format
+    # TODO: might wann do this with regex once the format is clear
+    if not "-" in request.headers.get('Authorization') :
+        return jsonify({"error": "Invalid Authorization header format"}), 401
+
+
+def create_app(config):
+    app.config.from_object(config)
+    return app
 
 if __name__ == '__main__':
     #app.run(debug=True)
