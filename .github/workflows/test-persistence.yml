@@ -18,7 +18,9 @@ jobs:
       - 
         name: run test
         working-directory: ./service/persistence
-        run: docker-compose -f docker-compose.yaml run --build test 
+        run: | 
+            ls
+            docker-compose -f docker-compose.yaml run test 
         
       - 
         name: Publish Unit Test Results
