@@ -15,24 +15,22 @@ jobs:
       - 
         name: checkout
         uses: actions/checkout@v2
-
-      - name: cwd
-        run: cd service/persistence
-
-      - name: ls
-        run: ls
       - 
         name: run test
+        working-directory: ./service/persistence
         run: make test
+        
       - 
         name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v1
         if: always()
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          files: ./test/test-results/*.xml
+          files: ./service/persistence/test/test-results/*.xml
       - 
         name: TearDown
+        working-directory: ./service/persistence
         run: make down
+        
 
     
