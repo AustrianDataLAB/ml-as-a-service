@@ -18,7 +18,9 @@ jobs:
 
       - name: cwd
         run: cd service/persistence
-        
+
+      - name: ls
+        run: ls
       - 
         name: run test
         run: make test
