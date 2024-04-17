@@ -1,4 +1,4 @@
-name: Run integration test using docker-compose
+name: Test persistence-service with docker-compose
 on: 
     push:
         branches: [ "feature/persistence-service" ]
@@ -18,13 +18,17 @@ jobs:
       - 
         name: run test
         run: make test
+        working-directory: ./service/persistence
       - 
         name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v1
         if: always()
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          files: ./test/test-results/*.xml
+          files: ./service/persistence/test/test-results/*.xml
       - 
         name: TearDown
         run: make down
+        working-directory: ./service/persistence
+
+    
