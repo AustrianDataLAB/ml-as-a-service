@@ -1,0 +1,29 @@
+FROM python:latest
+
+RUN mkdir /app
+WORKDIR /app
+
+RUN mkdir test
+RUN mkdir test/data
+
+
+COPY test/requirements.txt test/
+COPY requirements.txt .
+
+# Install test requirements
+RUN pip install -r test/requirements.txt --user
+
+# Install service requirements
+RUN pip install -r requirements.txt --user
+
+# Copy test files
+COPY test/*.py test/
+
+# Copy service files
+COPY *.py .
+
+
+WORKDIR /app/test
+
+#CMD ["tail", "-f", "/dev/null"]
+CMD ["python3", "-m", "pytest", "persistence-test.py"]

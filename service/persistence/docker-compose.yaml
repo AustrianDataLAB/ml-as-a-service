@@ -9,17 +9,15 @@ services:
     networks:
       - test_network
 
-  test-client:
+  test:
     build:
-      context: ./test
+      context: .
       dockerfile: ./Dockerfile.test
-    depends_on:
-      - persistence-service
-    environment:
-      - PERSISTENCE_SERVICE_URL=http://persistence-service:5000
-      - AUTH_TOKEN=asoijkudhfglaskldf-101234
-    networks:
-      - test_network
+    volumes:
+      - ./test/test-results:/app/test/test-results
+    #command: ["tail", "-f", "/dev/null"]
+    command: ["python3", "-m", "pytest", "--junitxml=test-results/pytest_results.xml", "persistence-test.py"]
+    
 
 networks:
   test_network:

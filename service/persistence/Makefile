@@ -7,7 +7,7 @@ PORT = 1919
 
 SEP = "----------------------------------------"
 
-.PHONY: build up run stop test
+.PHONY: build up run stop down test
 build:
 	docker build -t $(IMAGE_NAME) -f Dockerfile .
 	docker build -f test/Dockerfile.test -t persistence-tester ./test
@@ -23,5 +23,8 @@ stop:
 	docker stop $(CONTAINER_NAME)
 	docker rm $(CONTAINER_NAME)
 
+down:
+	docker-compose down --remove-orphans
+
 test: 
-	docker-compose up --build
+	docker-compose -f docker-compose.yaml run --build test 
