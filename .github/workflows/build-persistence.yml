@@ -55,8 +55,8 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           load: true
-          context: ./service/persistence
-          file: ./service/persistence/Dockerfile
+          context: ./persistence
+          file: ./persistence/Dockerfile
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
       -
@@ -65,7 +65,7 @@ jobs:
         uses: crazy-max/ghaction-container-scan@v3
         with:
           image: ${{ steps.meta.outputs.tags }}
-          dockerfile: ./service/persistence/Dockerfile
+          dockerfile: ./persistence/Dockerfile
 
       -
         name: Upload SARIF file
@@ -79,8 +79,8 @@ jobs:
         id: build-and-push
         uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
         with:
-          context: ./service/persistence
-          file: ./service/persistence/Dockerfile
+          context: ./persistence
+          file: ./persistence/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
