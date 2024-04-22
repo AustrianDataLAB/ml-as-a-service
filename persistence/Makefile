@@ -13,16 +13,9 @@ build:
 	docker build -f test/Dockerfile.test -t persistence-tester ./test
 #	docker tag $(IMAGE_NAME) image
 
-run:
-	docker run -p $(PORT):5000 --name $(CONTAINER_NAME) $(IMAGE_NAME)
-
 up:
 #	docker run -d -p $(PORT):5000 --name $(CONTAINER_NAME) $(IMAGE_NAME)
 	docker-compose up --build
-
-stop:
-	docker stop $(CONTAINER_NAME)
-	docker rm $(CONTAINER_NAME)
 
 down:
 	docker-compose down --remove-orphans
