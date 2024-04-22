@@ -8,8 +8,6 @@ RUN pip install -r requirements.txt --user
 
 
 
-
-
 FROM cgr.dev/chainguard/python:latest
 
 WORKDIR /app
@@ -17,6 +15,7 @@ WORKDIR /app
 # Make sure you update Python version in path
 COPY --from=builder /home/nonroot/.local/lib/python3.12/site-packages /home/nonroot/.local/lib/python3.12/site-packages
 
+COPY __init__.py .
 COPY main.py .
 
 ENTRYPOINT [ "python", "/app/main.py" ]

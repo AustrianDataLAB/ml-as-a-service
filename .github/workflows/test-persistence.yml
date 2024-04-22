@@ -31,6 +31,3 @@ jobs:
         name: TearDown
         working-directory: ./persistence
         run: make down
-        
-
-    

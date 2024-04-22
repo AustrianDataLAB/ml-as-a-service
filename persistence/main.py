@@ -3,32 +3,74 @@ import sys
 import hashlib
 from flask import Flask, request, send_file, jsonify
 
+import os
+import io
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient, ContentSettings
+from dotenv import load_dotenv
+
+def load_env():
+    load_dotenv()
+    global connection_string
+    connection_string  = os.getenv("CONNECTION_STRING")
+
+# Create a BlobServiceClient
+
+def get_blob_client(user,blob_name):
+    blob_service_client = BlobServiceClient.from_connection_string(connection_string)
+    container_name = user
+    container_client = blob_service_client.get_container_client(container_name)
+    if not container_client.exists():
+        container_client.create_container()
+        print(f"Container '{container_name}' created.")
+    blob_client = container_client.get_blob_client(blob_name)
+    return blob_client
+
+def upload_data(user,blob_name,data,content_type):
+    blob_client = get_blob_client(user,blob_name)
+    if blob_client.exists():
+        blob_client.delete_blob()
+
+    content_settings = ContentSettings(content_type=content_type)
+    blob_client.upload_blob(data, content_settings=content_settings)
+
+def download_blob(user, blob_name):
+    blob_client = get_blob_client(user,blob_name)
+    if not blob_client.exists():
+        raise Exception(f"Blob '{blob_name}' does not exist.")
+
+    download_stream = blob_client.download_blob()
+
+    blob_data = io.BytesIO()
+    blob_data.write(download_stream.read())
+    blob_data.seek(0)  # Reset the stream position to the beginning
+
+    # Get the content type of the blob
+    content_type = blob_client.get_blob_properties().content_settings.content_type
+
+    return blob_data, content_type
+
+
 app = Flask(__name__)
 
 # sha256 helper
-def calculate_sha256(input_string):
+def _sha1(input_string):
     if isinstance(input_string, str):
         input_string = input_string.encode('utf-8')
-    sha256_hash = hashlib.sha256(input_string).hexdigest()
+    sha256_hash = hashlib.sha1(input_string).hexdigest()
     return sha256_hash
 
-def get_userdata_dir():
-    return os.path.join(os.getcwd(),"userdata")
+def _get_user_sha(request):
+    #TODO: just a dummy- fix when auth is implemented
+    token = request.headers.get('Authorization')
+    user_id = token.split("-")[0]
+    return _sha1(user_id)
 
-def get_userdir(request):
-    auth_token = request.headers.get('Authorization') #can asume auth header is set
-    user_id = auth_token.split('-')[0]
-    user_data = get_userdata_dir()
-    user_dir = os.path.join(user_data,str(calculate_sha256(user_id)))
-    if not os.path.exists(user_dir):
-        os.makedirs(user_dir)
-        os.makedirs(os.path.join(user_dir,"data"))
-        os.makedirs(os.path.join(user_dir,"models"))
 
-    return os.path.join(user_data,str(calculate_sha256(user_id)))
+#---------------------------------------------------------------------
+#-------------generic upload/download functions-----------------------
+#---------------------------------------------------------------------
 
-@app.route('/data', methods=['POST'])
-def upload_file():
+def _upload_to_blob_storage(request,endpoint):
     if 'file' not in request.files:
         print("No file found in request", file=sys.stderr)
         return jsonify({"error": "No file provided"}), 400
@@ -39,34 +81,52 @@ def upload_file():
         print("File is empty", file=sys.stderr)
         return jsonify({"error": "File is empty"}), 400
     
-    user_dir = get_userdir(request)
+    user = _get_user_sha(request)
     
-    file.save(os.path.join(user_dir,"data", file.filename))
+    content_type = file.content_type
+    try:
+        upload_data(user,endpoint,file, content_type)
+        return 'Data uploaded successfully', 200
+    except Exception as e:
+        print(e, file=sys.stderr)
+        #TODO: differnt code here?
+        return jsonify({"error": "Data upload failed"}), 500
+   
+def _download_from_blob_storage(request,endpoint):
+    try:
+        user = _get_user_sha(request)
+        blob_data, content_type = download_blob(user, endpoint)
+        #TODO: maybe dynamic filename?
+        return send_file(blob_data,download_name="data", as_attachment=True, mimetype=content_type)
+    except Exception as e:
+        print(e, file=sys.stderr)
+        return jsonify({"error": "Data not found"}), 404
 
-    return 'File uploaded successfully under: ' + user_dir.split("/")[-1]+ ' with filename: ' + file.filename
 
+
+#---------------------------------------------------------------------
+#---------------------------------API---------------------------------
+#---------------------------------------------------------------------
+
+@app.route('/data', methods=['POST'])
+def upload_file():
+    return _upload_to_blob_storage(request,"data")
 
 @app.route('/data', methods=['GET'])
 def get_file():
-    user_dirname =  get_userdir(request)
-    cwd = os.getcwd()
-    if not os.path.exists(os.path.join(cwd,user_dirname)):
-        return 'No file uploaded yet'
-    if not os.path.exists(os.path.join(cwd,user_dirname,"data")):
-        return 'No file uploaded yet'
-    
-    
-    tmp = os.path.join(cwd,user_dirname,"data")
-    print('file'+str(tmp), file=sys.stderr)
-    file = os.path.join(cwd,user_dirname,"data",os.listdir(tmp)[0])
-   
-    return send_file(file, as_attachment=True)    
+    return _download_from_blob_storage(request,"data")
 
+@app.route('/model', methods=['POST'])
+def upload_model():
+    return _upload_to_blob_storage(request,"model")
+
+@app.route('/model', methods=['GET'])
+def get_model():
+    return _download_from_blob_storage(request,"model")
 
 @app.route('/')
 def hello_world():
     return 'Hello, World!'
-
 
 @app.before_request
 def enforce_auth_header():
@@ -86,9 +146,11 @@ def enforce_auth_header():
 
 
 def create_app(config):
+    load_env()
     app.config.from_object(config)
     return app
 
 if __name__ == '__main__':
+    load_env()
     #app.run(debug=True)
     app.run(host='0.0.0.0')

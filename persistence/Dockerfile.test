@@ -1,7 +1,7 @@
 FROM python:latest
 
-RUN mkdir /app
-WORKDIR /app
+RUN mkdir /persistence
+WORKDIR /persistence
 
 RUN mkdir test
 RUN mkdir test/data
@@ -19,9 +19,10 @@ RUN pip install -r requirements.txt --user
 COPY test/persistence-test.py test/
 COPY test/__init__.py test/__init__.py
 
-COPY main.py .
 COPY __init__.py .
+COPY main.py .
 
-WORKDIR /app/test
+
+WORKDIR /persistence/test
 #CMD ["tail", "-f", "/dev/null"]
 CMD ["python3", "-m", "pytest", "persistence-test.py"]
