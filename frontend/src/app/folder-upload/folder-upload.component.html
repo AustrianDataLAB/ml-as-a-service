@@ -23,10 +23,10 @@
         <!-- File Upload Button -->
         <div class="input-group mb-3">
           <div class="custom-file">
-            <input type="file" class="custom-file-input" id="folderUpload">
+            <input type="file" class="custom-file-input" id="folderUpload" (change)="onFolderSelected($event)">
           </div>
           <div class="input-group-append">
-            <button class="btn btn-outline-secondary" type="button">Upload</button>
+            <button class="btn btn-outline-secondary" type="button" [disabled]="!isFolderValid" (click)="onUpload()">Upload</button>
           </div>
         </div>
 
