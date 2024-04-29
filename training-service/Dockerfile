@@ -1,14 +1,18 @@
-FROM python
+FROM cgr.dev/chainguard/python:latest-dev as builder
+
+WORKDIR /app
+
+COPY requirements.txt .
+
+RUN pip install -r requirements.txt --user
+
+
+FROM cgr.dev/chainguard/python:latest
 
 # Set the working directory to /app
-WORKDIR /training-service
-COPY ./requirements.txt ./
-RUN pip install -r ./requirements.txt
+WORKDIR /app
 
-# RUN curl -X GET -H http://mlaas-service-persistence:1919
-# RUN curl -X GET -H "Authorization: 001-token" -o file.tgz http://persistence-container:1919/data
-COPY ./file.tgz ./
-RUN mkdir ./data && tar -xf ./file.tgz -C ./data && rm file.tgz
+COPY --from=builder /home/nonroot/.local/lib/python3.12/site-packages /home/nonroot/.local/lib/python3.12/site-packages
 
 COPY ./model-training.py ./
 CMD ["python", "model-training.py"]
