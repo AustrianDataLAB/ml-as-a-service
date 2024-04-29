@@ -1,6 +1,6 @@
-tensorflow
+h5py == 3.9.0
+tensorflow == 2.12.0
+keras == 2.12.0
 numpy
-keras
 matplotlib
-pyyaml 
-h5py
+pyyaml == 6.0.1
