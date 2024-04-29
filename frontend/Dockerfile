@@ -1,4 +1,4 @@
-FROM node:alpine AS indexer
+FROM node:alpine AS builder
 
 WORKDIR /usr/src/app
 
