@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import tensorflow as tf
 
@@ -8,7 +9,9 @@ from keras.models import Sequential
 seed = 42
 np.random.seed(seed)
 
-def create_datasets(data_dir, img_height, img_width, batch_size):
+data_dir = "data"
+
+def create_datasets(img_height, img_width, batch_size):
     train_ds, val_ds = keras.utils.image_dataset_from_directory(
         data_dir,
         validation_split=0.2,
@@ -32,9 +35,8 @@ def create_model(train_ds, val_ds, img_height, img_width):
         layers.RandomZoom(0.1),
     ])
 
-    class_names = train_ds.class_names
-    print(class_names)
-    
+    # work around if train_ds.class_names is undefined
+    class_names = [item for item in os.listdir(data_dir) if os.path.isdir(os.path.join(data_dir, item))]    
     num_classes = len(class_names)
 
     model = Sequential([
@@ -72,7 +74,7 @@ if __name__ == "__main__":
     img_width = 180
 
     # data_dir = load_data()
-    train_ds, val_ds = create_datasets("data", img_height, img_width, batch_size)
+    train_ds, val_ds = create_datasets(img_height, img_width, batch_size)
     model = create_model(train_ds, val_ds, img_height, img_width)
     history = train_model(model, train_ds, val_ds)
     model.save_weights('./model.weights.keras')
