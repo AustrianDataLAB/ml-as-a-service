@@ -129,7 +129,7 @@ def hello_world():
     return 'Hello, World!'
 
 @app.route('/healthcheck')
-def hello_world():
+def healthcheck():
     return 200, 'OK'
 
 @app.before_request
