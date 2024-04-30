@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: persistence-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: persistence-service
+  template:
+    metadata:
+      labels:
+        app: persistence-service
+    spec:
+      containers:
+      - name: persistence-service
+        image: ghcr.io/austriandatalab/ml-as-a-service:feature-persistence-service  # Replace this with remote eventually
+        ports:
+        - containerPort: 5000
+        env:
+        - name: CONNECTION_STRING
+          value: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite-service:10000/devstoreaccount1;QueueEndpoint=http://azurite-service:10001/devstoreaccount1;TableEndpoint=http://azurite-service:10002/devstoreaccount1;"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: persistence-service
+spec:
+  selector:
+    app: persistence-service
+  ports:
+    - protocol: TCP
+      name: api
+      port: 5000
+      targetPort: 5000
