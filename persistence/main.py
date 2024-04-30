@@ -128,6 +128,10 @@ def get_model():
 def hello_world():
     return 'Hello, World!'
 
+@app.route('/healthcheck')
+def hello_world():
+    return 200, 'OK'
+
 @app.before_request
 def enforce_auth_header():
     #print('AUTH-HEADER:'+str(request.headers.get('Authorization')), file=sys.stderr)
