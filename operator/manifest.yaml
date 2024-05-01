@@ -1,31 +1,46 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: job-creator-service-account
+  name: operator-service-account
+  namespace: mlaas
+
+---
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/service-account-token
+metadata:
+  name: token-secret
+  namespace: mlaas
+  annotations:
+    kubernetes.io/service-account.name: operator-service-account
 
 ---
 
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: job-creator-role
+  name: operator-role
+  namespace: mlaas
 rules:
 - apiGroups: ["batch"]
   resources: ["jobs"]
   verbs: ["create", "get", "list", "delete"]  # Include other verbs as needed
-
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["create", "get", "list", "delete"]  # Include other verbs as needed
 ---
 
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: job-creator-role-binding
+  name: operator-role-binding
+  namespace: mlaas
 subjects:
 - kind: ServiceAccount
-  name: job-creator-service-account
+  name: operator-service-account
 roleRef:
   kind: Role
-  name: job-creator-role
+  name: operator-role
   apiGroup: rbac.authorization.k8s.io
 
 
@@ -34,32 +49,41 @@ roleRef:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: flask-service
+  name: operator-deployment
+  namespace: mlaas
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: flask-service
+      app: operator
   template:
     metadata:
       labels:
-        app: flask-service
+        app: operator
     spec:
-      serviceAccountName: job-creator-service-account  # Assign the ServiceAccount to the Pod
+      serviceAccountName: operator-service-account  # Assign the ServiceAccount to the Pod
       containers:
-        - name: flask-service
-          image: flask-service
+        - name: operator
+          image: operator
           imagePullPolicy: IfNotPresent   # Specify the image pull policy here
           ports:
             - containerPort: 5000
+          env:
+            - name: NAMESPACE
+              value: mlaas
+            - name: TRAINING_IMAGE
+              value: hello-world
+            - name: SERVING_IMAGE
+              value: hello-world
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: flask-service
+  name: operator-service
+  namespace: mlaas
 spec:
   ports:
     - port: 80
       targetPort: 5000
   selector:
-    app: flask-service
+    app: operator
