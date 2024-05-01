@@ -7,7 +7,7 @@ NAMESPACE := deployment-test
 
 SEP = "----------------------------------------"
 
-.PHONY: build up down azurite test deploy cleanup debug
+.PHONY: build up down azurite test deploy cleanup debug rollout
 build:
 	docker build -t $(IMAGE_NAME) -f Dockerfile .
 	docker build  -t $(IMAGE_NAME)-tester -f Dockerfile.test .
@@ -35,3 +35,7 @@ forward:
 
 cleanup:
 	kubectl delete namespace $(NAMESPACE)
+
+
+rollout:
+	kubectl rollout restart -n $(NAMESPACE) deployment/persistence-service
