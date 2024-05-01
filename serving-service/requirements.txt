@@ -1,0 +1,8 @@
+Flask
+python-dotenv
+tensorflow
+numpy
+keras
+matplotlib
+pyyaml 
+h5py

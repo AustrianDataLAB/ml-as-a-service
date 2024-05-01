@@ -1,0 +1,15 @@
+version: '3.5'
+
+services:
+  serving-service:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "5001:5001"
+    networks:
+      - persistence_test_network
+
+networks:
+  persistence_test_network:
+    external: true
