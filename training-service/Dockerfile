@@ -11,4 +11,6 @@ RUN pip install -r requirements.txt --user
 # at the moment only single stage, because of problems concerning tensorflow and python-version
 COPY ./model-training.py .
 
+RUN mkdir -p /app/data
+
 ENTRYPOINT ["python3", "/app/model-training.py"]

@@ -8,4 +8,6 @@ RUN pip install -r requirements.txt
 
 COPY ./model-training.py .
 
+RUN mkdir -p /app/data
+
 CMD [ "python", "model-training.py" ]
