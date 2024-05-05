@@ -56,8 +56,8 @@ jobs:
           load: true
           context: ./operator
           file: ./operator/Dockerfile
-          tags: ${{ steps.meta.outputs.tags }}, operator
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }} , operator
       -
         name: Scan for vulnerabilities
         id: scan
