@@ -1,9 +1,12 @@
 IMAGE_NAME := mlaas-service-training
 CONTAINER_NAME := training-container
 
-.PHONY: build up run stop test
+.PHONY: build build-test up run stop 
 build:
 	docker build -t $(IMAGE_NAME) -f Dockerfile .
+
+build-test:
+	docker build -t $(IMAGE_NAME) -f Dockerfile.test .
 
 up:
 	docker run --name $(CONTAINER_NAME) $(IMAGE_NAME)

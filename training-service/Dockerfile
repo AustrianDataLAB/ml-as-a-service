@@ -1,4 +1,6 @@
-FROM python:3.9-slim as builder
+FROM cgr.dev/chainguard/python:latest-dev
+
+ENV persistence_url /persistence
 
 WORKDIR /app
 
@@ -6,7 +8,7 @@ COPY requirements.txt .
 
 RUN pip install -r requirements.txt --user
 
-COPY /data/ ./data/
-COPY ./model-training.py ./
+# at the moment only single stage, because of problems concerning tensorflow and python-version
+COPY ./model-training.py .
 
-CMD ["python", "model-training.py"]
+ENTRYPOINT ["python3", "/app/model-training.py"]
