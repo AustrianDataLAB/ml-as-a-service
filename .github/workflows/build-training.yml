@@ -9,7 +9,7 @@ on:
 #  schedule:
 #    - cron: '40 16 * * *'
   push:
-    branches: [ "feature/ml-serving-service" ]
+    branches: [ "feature/ml-training-service" ]
     # Publish semver tags as releases.
     #tags: [ 'v*.*.*' ]
   pull_request:
@@ -65,7 +65,7 @@ jobs:
         uses: crazy-max/ghaction-container-scan@v3
         with:
           image: ${{ steps.meta.outputs.tags }}
-          dockerfile: ./serving-service/Dockerfile
+          dockerfile: ./training-service/Dockerfile
 
       -
         name: Upload SARIF file
@@ -79,8 +79,8 @@ jobs:
         id: build-and-push
         uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
         with:
-          context: ./serving-service
-          file: ./serving-service/Dockerfile
+          context: ./training-service
+          file: ./training-service/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
