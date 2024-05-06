@@ -14,6 +14,7 @@ export class DataService {
     }
 
     uploadFile(file: File) {
+        console.log(this.data_url)
         const formData = new FormData();
         formData.append('file', file);
         return this.http.post(this.data_url, formData);
