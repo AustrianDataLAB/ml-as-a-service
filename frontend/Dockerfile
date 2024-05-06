@@ -15,8 +15,8 @@ RUN npm install
 RUN npm run build
 
 RUN cat src/environments/environment.ts
-CMD ["npm", "start"]
-#CMD ["ng", "serve", "--host", "0.0.0.0"]
+CMD ["npm", "run-script", "replace-vars"]
+CMD ["ng", "serve", "--host", "0.0.0.0"]
 
 
 

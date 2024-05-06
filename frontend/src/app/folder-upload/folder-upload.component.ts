@@ -36,7 +36,6 @@ export class FolderUploadComponent {
 
   onUpload(): void {
     if (this.selectedFolder) {
-      // Here, you can implement the folder upload logic
       console.log('Folder uploaded:', this.selectedFolder);
       this.uploadService.uploadFile(this.selectedFolder).subscribe({
         next: (res) => {

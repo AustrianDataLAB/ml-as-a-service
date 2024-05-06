@@ -8,7 +8,7 @@ import {environment} from "../../environments/environment";
 export class DataService {
 
     private global_url = environment.API_URL;
-    private data_url = this.global_url + 'data'
+    private data_url = this.global_url + '/data'
 
     constructor(private http: HttpClient) {
     }
