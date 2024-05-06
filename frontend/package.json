@@ -3,8 +3,9 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
+    "replace-vars": "node ./src/environments/replace_environment_variables.js",
+    "start": " npm run-script replace-vars  && ng serve",
+    "build": " npm run-script replace-vars && ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
@@ -27,6 +28,7 @@
     "zone.js": "~0.14.3"
   },
   "devDependencies": {
+    "@angular-builders/custom-webpack": "^17.0.2",
     "@angular-devkit/build-angular": "^17.3.4",
     "@angular/cli": "^17.3.4",
     "@angular/compiler-cli": "^17.3.0",

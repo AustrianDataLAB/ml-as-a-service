@@ -1,3 +1,4 @@
-export const environment = {
-  apiUrl: 'API_URL_PLACEHOLDER'
-};
+export const environment =
+  {
+    API_URL: '${BACKEND_URL}${BACKEND_PORT}'
+  };
