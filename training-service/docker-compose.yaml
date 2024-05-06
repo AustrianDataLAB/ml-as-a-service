@@ -1,0 +1,16 @@
+version: '3.5'
+
+services:
+  training-service:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: mlaas-service-training:latest
+    ports:
+      - "5000:5000"
+    networks:
+      - persistence_test_network
+
+networks:
+  persistence_test_network:
+    external: true

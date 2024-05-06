@@ -1,4 +1,7 @@
+import json
+import zipfile
 import os
+from io import BytesIO
 import imghdr
 import requests
 import tarfile
@@ -15,6 +18,7 @@ from keras.models import Sequential
 
 seed = 42
 np.random.seed(seed)
+config = {}
 
 data_dir = os.path.abspath("./data")
 
@@ -50,9 +54,25 @@ def fetch_data(persistence_url):
     os.remove(tar_filename)
 
 def transmit_data(persistence_url, model_path):
-    with open(model_path, 'rb') as file:
-        files = {'file': file}
-        response = requests.post(persistence_url, files=files)
+    zip_buffer = BytesIO()
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+        # Add model file to zip
+        zip_file.write(model_path, arcname=os.path.basename(model_path))
+        
+        # Serialize config dictionary to JSON and write directly to the zip
+        with zip_file.open('config.json', 'w') as config_file:
+            config_file.write(json.dumps(config).encode('utf-8'))
+
+    # Prepare the buffer to be used as a file-like object for the HTTP request
+    zip_buffer.seek(0)
+
+    # Set the name of the zip file you are sending
+    zip_filename = 'model_and_config.zip'
+
+    # Prepare the files dictionary to send via requests
+    files = {'file': (zip_filename, zip_buffer, 'application/zip')}
+
+    response = requests.post(persistence_url, files=files)
 
     if response.status_code == 200:
         print("File transmitted successfully.")
@@ -84,7 +104,9 @@ def create_model(train_ds, val_ds, img_height, img_width):
     ])
 
     # work around if train_ds.class_names is undefined
-    class_names = [item for item in os.listdir(data_dir) if os.path.isdir(os.path.join(data_dir, item))]    
+    class_names = [item for item in os.listdir(data_dir) if os.path.isdir(os.path.join(data_dir, item))]
+    global config
+    config['class_names'] = class_names
     num_classes = len(class_names)
 
     model = Sequential([
@@ -116,6 +138,11 @@ def train_model(model, train_ds, val_ds, epochs = 10):
     )
     return history
 
+def set_config(height, width):
+    global config
+    config['height'] = height
+    config['width'] = width
+
 if __name__ == "__main__":
     parser = ArgumentParser(description="ImageClassifaction")
     parser.add_argument("--img_height", type=int, default=180, help="Height of the images")
@@ -132,8 +159,11 @@ if __name__ == "__main__":
     train_ds, val_ds = create_datasets(args.img_height, args.img_width, args.batch_size)
     model = create_model(train_ds, val_ds, args.img_height, args.img_width)
     history = train_model(model, train_ds, val_ds, args.epochs)
-    model.save_weights('./model.weights.h5')
+    model.save('./my_model.keras')
+
+    # set config
+    set_config(args.img_height, args.img_width)
 
     # transmit model
-    transmit_data(args.persistence_url, './model.weights.h5')
+    transmit_data(args.persistence_url, './my_model.keras')
 

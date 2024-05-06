@@ -8,12 +8,15 @@ build:
 build-test:
 	docker build -t $(IMAGE_NAME) -f Dockerfile.test .
 
-up:
-	docker run --name $(CONTAINER_NAME) $(IMAGE_NAME)
-
 run:
 	docker run -d --name $(CONTAINER_NAME) $(IMAGE_NAME)
 
 stop:
 	docker stop $(CONTAINER_NAME)
 	docker rm $(CONTAINER_NAME)
+
+up:
+	docker-compose up --build -d
+
+down:
+	docker-compose down --remove-orphans
