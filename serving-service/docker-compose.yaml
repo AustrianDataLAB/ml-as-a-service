@@ -5,6 +5,9 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
+    image: mlaas-service-serving:latest
+    # environment:
+    #   - PERSISTENCE_SERVICE_URL=host.docker.internal:5000
     ports:
       - "5001:5001"
     networks:

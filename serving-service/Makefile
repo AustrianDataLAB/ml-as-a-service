@@ -1,5 +1,5 @@
 IMAGE_NAME := mlaas-service-serving
-CONTAINER_NAME := training-container
+CONTAINER_NAME := serving-container
 
 .PHONY: build up down stop test
 
