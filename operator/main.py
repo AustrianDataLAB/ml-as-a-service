@@ -7,7 +7,14 @@ import logging
 import uuid
 
 # Define the required environment variables
-REQUIRED_ENV_VARS = ["TRAINING_IMAGE", "SERVING_IMAGE", "NAMESPACE"]
+REQUIRED_ENV_VARS = [
+    "TRAINING_IMAGE",
+    "SERVING_IMAGE",
+    "NAMESPACE",
+    "SERVING_PORT",
+    "PERSISTENCE_SERVICE_URI",
+    "DOMAIN",
+]
 
 # Set up logging
 logging.basicConfig(
@@ -33,6 +40,9 @@ apps_v1_api = client.AppsV1Api()
 
 # Create an instance of the Kubernetes CoreV1Api client
 core_v1_api = client.CoreV1Api()
+
+# Create an insteance of the Kubernetes ExtensionsV1beta1Api client
+networking_v1_api = client.NetworkingV1Api()
 
 # Create a Flask app
 app = Flask(__name__)
@@ -93,6 +103,21 @@ def create_training_job():
         logging.error(f"Unexpected error occurred: {str(e)}")
         return jsonify({"error": "An unexpected error occurred"}), 500
 
+    # Define the ConfigMap resource with the required environment variables
+    config_map = client.V1ConfigMap(
+        api_version="v1",
+        kind="ConfigMap",
+        metadata=client.V1ObjectMeta(
+            name="training-" + auth_header + "-" + random_uuid,
+            labels={"app": "training", "tenant": auth_header, "id": random_uuid},
+        ),
+        data={
+            "PERSISTENCE_SERVICE_URI": os.getenv("PERSISTENCE_SERVICE_URI"),
+            "UUID": random_uuid,
+            "TENANT": auth_header,
+        },
+    )
+
     # Define the Job resource with the correct restart policy
     job = client.V1Job(
         api_version="batch/v1",
@@ -109,6 +134,44 @@ def create_training_job():
                         client.V1Container(
                             name="training-" + auth_header,
                             image=os.getenv("TRAINING_IMAGE"),
+                            env=[
+                                client.V1EnvVar(
+                                    name="PERSISTENCE_SERVICE_URI",
+                                    value_from=client.V1EnvVarSource(
+                                        config_map_key_ref=client.V1ConfigMapKeySelector(
+                                            name="training-"
+                                            + auth_header
+                                            + "-"
+                                            + random_uuid,
+                                            key="PERSISTENCE_SERVICE_URI",
+                                        )
+                                    ),
+                                ),
+                                client.V1EnvVar(
+                                    name="TENANT",
+                                    value_from=client.V1EnvVarSource(
+                                        config_map_key_ref=client.V1ConfigMapKeySelector(
+                                            name="training-"
+                                            + auth_header
+                                            + "-"
+                                            + random_uuid,
+                                            key="TENANT",
+                                        )
+                                    ),
+                                ),
+                                client.V1EnvVar(
+                                    name="UUID",
+                                    value_from=client.V1EnvVarSource(
+                                        config_map_key_ref=client.V1ConfigMapKeySelector(
+                                            name="training-"
+                                            + auth_header
+                                            + "-"
+                                            + random_uuid,
+                                            key="UUID",
+                                        )
+                                    ),
+                                ),
+                            ],
                         )
                     ],
                 )
@@ -121,6 +184,8 @@ def create_training_job():
     try:
         # Create the Job in the cluster
         batch_v1_api.create_namespaced_job(namespace=auth_header, body=job)
+        # Create the ConfigMap in the cluster
+        core_v1_api.create_namespaced_config_map(namespace=auth_header, body=config_map)
         logging.info(f"Training job created successfully for {auth_header}")
         return jsonify({"id": random_uuid}), 202
     except Exception as e:
@@ -232,6 +297,20 @@ def create_serving_deployment():
         logging.error(f"Unexpected error occurred: {str(e)}")
         return jsonify({"error": "An unexpected error occurred"}), 500
 
+    # Define the ConfigMap resource with the required environment variables
+    config_map = client.V1ConfigMap(
+        api_version="v1",
+        kind="ConfigMap",
+        metadata=client.V1ObjectMeta(
+            name="serving-" + auth_header,
+            labels={"app": "serving", "tenant": auth_header},
+        ),
+        data={
+            "PERSISTENCE_SERVICE_URI": os.getenv("PERSISTENCE_SERVICE_URI"),
+            "TENANT": auth_header,
+        },
+    )
+
     # Define the Deployment resource
     deployment = client.V1Deployment(
         api_version="apps/v1",
@@ -243,17 +322,41 @@ def create_serving_deployment():
         spec=client.V1DeploymentSpec(
             replicas=1,
             selector=client.V1LabelSelector(
-                match_labels={"app": "serving-" + auth_header}
+                match_labels={"app": "serving", "tenant": auth_header}
             ),
             template=client.V1PodTemplateSpec(
-                metadata=client.V1ObjectMeta(labels={"app": "serving-" + auth_header}),
+                metadata=client.V1ObjectMeta(
+                    labels={"app": "serving", "tenant": auth_header}
+                ),
                 spec=client.V1PodSpec(
                     containers=[
                         client.V1Container(
                             name="serving-" + auth_header,
                             image=os.getenv("SERVING_IMAGE"),
-                            ports=[client.V1ContainerPort(container_port=8501)],
-                            command=["/bin/sh", "-c", "tail -f /dev/null"],
+                            ports=[
+                                client.V1ContainerPort(
+                                    container_port=int(os.getenv("SERVING_PORT"))
+                                )
+                            ],
+                            env=[
+                                client.V1EnvVar(
+                                    name="PERSISTENCE_SERVICE_URI",
+                                    value_from=client.V1EnvVarSource(
+                                        config_map_key_ref=client.V1ConfigMapKeySelector(
+                                            name="serving-" + auth_header,
+                                            key="PERSISTENCE_SERVICE_URI",
+                                        )
+                                    ),
+                                ),
+                                client.V1EnvVar(
+                                    name="TENANT",
+                                    value_from=client.V1EnvVarSource(
+                                        config_map_key_ref=client.V1ConfigMapKeySelector(
+                                            name="serving-" + auth_header, key="TENANT"
+                                        )
+                                    ),
+                                ),
+                            ],
                         )
                     ]
                 ),
@@ -261,11 +364,77 @@ def create_serving_deployment():
         ),
     )
 
+    # Define the Service resource with NodePort type
+    service = client.V1Service(
+        api_version="v1",
+        kind="Service",
+        metadata=client.V1ObjectMeta(
+            name="serving-" + auth_header,
+            labels={"app": "serving", "tenant": auth_header},
+        ),
+        spec=client.V1ServiceSpec(
+            selector={"app": "serving", "tenant": auth_header},
+            ports=[client.V1ServicePort(port=int(os.getenv("SERVING_PORT")))],
+            type="NodePort",
+        ),
+    )
+
+    # Define the Ingress resource
+    ingress = client.V1Ingress(
+        api_version="networking.k8s.io/v1",
+        kind="Ingress",
+        metadata=client.V1ObjectMeta(
+            name="serving-" + auth_header,
+            labels={"app": "serving", "tenant": auth_header},
+        ),
+        spec=client.V1IngressSpec(
+            rules=[
+                client.V1IngressRule(
+                    host=os.getenv("DOMAIN"),
+                    http=client.V1HTTPIngressRuleValue(
+                        paths=[
+                            client.V1HTTPIngressPath(
+                                path="/serving/" + auth_header,
+                                path_type="Prefix",
+                                backend=client.V1IngressBackend(
+                                    service=client.V1IngressServiceBackend(
+                                        name="serving-" + auth_header,
+                                        port=client.V1ServiceBackendPort(
+                                            number=int(os.getenv("SERVING_PORT"))
+                                        ),
+                                    )
+                                ),
+                            )
+                        ]
+                    ),
+                )
+            ]
+        ),
+    )
+
     try:
+        # Create the ConfigMap in the cluster
+        core_v1_api.create_namespaced_config_map(namespace=auth_header, body=config_map)
+        logging.info(f"Serving ConfigMap created successfully for {auth_header}")
+
         # Create the Deployment in the cluster
         apps_v1_api.create_namespaced_deployment(namespace=auth_header, body=deployment)
         logging.info(f"Serving deployment created successfully for {auth_header}")
-        return jsonify({"message": "Serving deployment created successfully"}), 201
+
+        # Create the Service in the cluster
+        core_v1_api.create_namespaced_service(namespace=auth_header, body=service)
+        logging.info(f"Serving service created successfully for {auth_header}")
+
+        # Create the Ingress in the cluster
+        networking_v1_api.create_namespaced_ingress(namespace=auth_header, body=ingress)
+        logging.info(f"Serving ingress created successfully for {auth_header}")
+
+        return (
+            jsonify(
+                {"url": "https://" + os.getenv("DOMAIN") + "/serving/" + auth_header}
+            ),
+            201,
+        )
     except Exception as e:
         logging.error(f"Unexpected error occurred: {str(e)}")
         return jsonify({"error": "An unexpected error occurred"}), 500
@@ -282,12 +451,23 @@ def get_serving_deployment():
         deployment = apps_v1_api.read_namespaced_deployment(
             name="serving-" + auth_header, namespace=auth_header
         )
+
+        # Fetch the Service from the cluster
+        service = core_v1_api.read_namespaced_service(
+            name="serving-" + auth_header, namespace=auth_header
+        )
+
+        # Fetch the Ingress from the cluster
+        ingress = networking_v1_api.read_namespaced_ingress(
+            name="serving-" + auth_header, namespace=auth_header
+        )
+
         logging.info(
             f"Serving deployment status for {auth_header}: {deployment.status}"
         )
         return (
             jsonify(
-                {"status": "OK" if deployment.status.available_replicas else "FAILING"}
+                {"available": True if deployment.status.available_replicas else False}
             ),
             200,
         )
@@ -314,7 +494,18 @@ def delete_serving_deployment():
             name="serving-" + auth_header, namespace=auth_header
         )
         logging.info(f"Serving deployment deleted successfully for {auth_header}")
-        return jsonify({"message": "Serving deployment deleted successfully"}), 200
+
+        core_v1_api.delete_namespaced_service(
+            name="serving-" + auth_header, namespace=auth_header
+        )
+        logging.info(f"Serving service deleted successfully for {auth_header}")
+
+        networking_v1_api.delete_namespaced_ingress(
+            name="serving-" + auth_header, namespace=auth_header
+        )
+        logging.info(f"Serving ingress deleted successfully for {auth_header}")
+
+        return jsonify(), 200
     except ApiException as e:
         logging.error(f"ApiException occurred: {str(e)}")
         if e.status == 404:
