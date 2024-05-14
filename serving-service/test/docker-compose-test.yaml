@@ -13,7 +13,7 @@ services:
     environment:
       - PERSISTENCE_SERVICE_URL=127.0.0.1:5000
     volumes:
-      - ./test/test-results:/serving/test/test-results
+      - ./test-results:/serving/test/test-results
     networks:
       - test_network
     #command: ["tail", "-f", "/dev/null"]
