@@ -1,0 +1,8 @@
+{
+    "img_height": 180,
+    "img_width": 180,
+    "class_names": [
+        "cats",
+        "dogs"
+    ]
+}

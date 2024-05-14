@@ -3,12 +3,10 @@
 This service is used to serve trained models to do inference.
 
 # Endpoints
-- ``POST /infere``: user can store data (its meant to be a zip    achieve however thats not enforeced atm)
+- ``GET /``: check if the service is up, returns "Hello, World!"
+- ``POST /infere``: user can infer a result by sending a request with a picture
 
 # TODO
-- ``logic``
-- ``testing``
-- ``logging / exception handling``
 
 # Quickstart
 ## Requirements
@@ -18,3 +16,4 @@ This service is used to serve trained models to do inference.
 ## Howto
 - ``make build`` to build the service image
 - ``make up/down`` if to run/cleanup the service+local backend in containers
+- ``make test`` to run the tests

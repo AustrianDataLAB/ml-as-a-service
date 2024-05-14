@@ -11,3 +11,6 @@ up:
 
 down:
 	docker-compose down --remove-orphans
+
+test: 
+	docker compose -f test/docker-compose-test.yaml up --build --abort-on-container-exit

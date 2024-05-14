@@ -1,0 +1,20 @@
+version: '3'
+    
+networks:
+  test_network:
+    driver: bridge
+
+services:
+  test:
+    build:
+      context: ..
+      dockerfile: ./test/Dockerfile.test
+    image: serving-test
+    environment:
+      - PERSISTENCE_SERVICE_URL=127.0.0.1:5000
+    volumes:
+      - ./test/test-results:/serving/test/test-results
+    networks:
+      - test_network
+    #command: ["tail", "-f", "/dev/null"]
+    command: ["python3", "-m", "pytest", "--junitxml=test-results/pytest_results.xml", "serving-test.py"]

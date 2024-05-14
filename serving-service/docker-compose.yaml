@@ -1,5 +1,9 @@
 version: '3.5'
 
+networks:
+  test_network:
+    driver: bridge
+
 services:
   serving-service:
     build:
@@ -11,8 +15,4 @@ services:
     ports:
       - "5001:5001"
     networks:
-      - persistence_test_network
-
-networks:
-  persistence_test_network:
-    external: true
+      - test_network

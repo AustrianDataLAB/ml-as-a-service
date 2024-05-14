@@ -9,6 +9,7 @@ import json
 import logging
 import numpy as np
 import tensorflow as tf
+from werkzeug.utils import secure_filename
 
 # Create a Flask app
 app = Flask(__name__)
@@ -85,7 +86,7 @@ def _inference(image):
         logging.error(f"Unexpected error occurred: {str(e)}")
         return jsonify({"error": "An unexpected error occurred"}), 500
 
-def _parse_image(request):
+def _parse_and_infer(request):
     if 'file' not in request.files:
         logging.error("No file part in infer request")
         return jsonify({"error": "No file part"}), 400
@@ -95,16 +96,22 @@ def _parse_image(request):
         return jsonify({"error": "Infer request has empty file"}), 400
         
     try:
-        # Read the image file
-        image_data = file.read()
-        image = tf.image.decode_image(image_data, channels=3, expand_animations=False)
-        
-        # Ensure image is in the right format
-        image = tf.image.resize(image, [config['img_height'], config['img_width']])
-        
+        # Save file
+        filename = secure_filename(file.filename)
+        save_path = os.path.join('uploads', filename)
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        file.save(save_path)
+
+        # Load and preprocess image
+        image = tf.keras.preprocessing.image.load_img(save_path, target_size=(config['img_height'], config['img_width']))        
         img_array = tf.keras.utils.img_to_array(image)
         img_array = tf.expand_dims(img_array, 0) # Create a batch
-        return image
+
+        # Remove file
+        if os.path.exists(save_path):
+            os.remove(save_path)
+
+        return _inference(img_array)
     except Exception as e:
         logging.error(f"Error processing image: {str(e)}")
         return jsonify({"error": "Error processing image"}), 500
@@ -116,13 +123,18 @@ def _parse_image(request):
 
 @app.route('/infer', methods=['POST'])
 def inference():
-    return _inference(_parse_image(request))
+    return _parse_and_infer(request)
 
     
 @app.route('/', methods=['GET'])
 def hello_world():
     return "Hello, World!"
 
+def create_app(config):
+    setup()
+    load_model()
+    app.config.from_object(config)
+    return app
 
 if __name__ == '__main__':
     setup()
