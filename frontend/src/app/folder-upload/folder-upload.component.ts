@@ -18,11 +18,14 @@ export class FolderUploadComponent {
   labelVisible = false;
   classificationLabel = '';
   uploadedImage: any;
+  isTrainingFinished = false;
 
   constructor(private uploadService: DataService, private toastrService: ToastrService) {
   }
 
   onFolderSelected(event: Event): void {
+    console.log(this.isTrainingFinished)
+    console.log(this.isServingStarted)
     const target = event.target as HTMLInputElement;
     const file: File = (target.files as FileList)[0];
 
@@ -49,7 +52,7 @@ export class FolderUploadComponent {
     if (file) {
       if (file.type !== 'image/jpeg'  && file.type !== 'image/png') {
         console.error('Invalid file type. Please upload a jpeg file.');
-        this.toastrService.error('Invalid file type. Please upload a jpeg file.');
+        this.toastrService.error('Invalid file type. Please upload a jpeg or png file.');
         return;
       }
 
@@ -60,6 +63,7 @@ export class FolderUploadComponent {
       }
       this.isImageValid = true;
       this.uploadedImage = file;
+      this.classificationLabel = '';
 
       const reader = new FileReader();
       reader.readAsDataURL(file);
@@ -89,31 +93,13 @@ export class FolderUploadComponent {
     }
   }
 
-  classify(): void {
-    if (this.isImageValid) {
-      this.uploadService.classify(this.uploadedImage).subscribe({
-        next: (res) => {
-          this.labelVisible = true;
-          this.isUploadSuccessfull = true;
-          this.classificationLabel = res;
-        },
-        error: (err) => {
-          this.toastrService.error('Error uploading file. Please try again.');
-          console.error('Error uploading file:', err);
-        }
-      });
-
-    } else {
-      console.log('No folder selected');
-    }
-  }
-
   startTraining(): void {
     if (this.isUploadSuccessfull) {
       console.log('Start training');
       this.uploadService.startTraining().subscribe({
         next: (res) => {
           this.toastrService.success('Started training successfully.');
+          this.isTrainingFinished = true;
         },
         error: (err) => {
           this.toastrService.error('Error starting training. Please try again.');
@@ -145,7 +131,7 @@ export class FolderUploadComponent {
       this.uploadService.stopServing().subscribe({
         next: (res) => {
           this.toastrService.success('Stopped serving successfully.');
-          this.isServingStarted = false;
+          this.reset()
         },
         error: (err) => {
           this.toastrService.error('Error stopping serving. Please try again.');
@@ -153,6 +139,34 @@ export class FolderUploadComponent {
         }
       });
     }
+  }
+
+  classify(): void {
+    if (this.isImageValid) {
+      this.uploadService.classify(this.uploadedImage).subscribe({
+        next: (res) => {
+          this.labelVisible = true;
+          this.classificationLabel = res;
+        },
+        error: (err) => {
+          this.toastrService.error('Error uploading file. Please try again.');
+          console.error('Error uploading file:', err);
+        }
+      });
+
+    } else {
+      console.log('No folder selected');
+    }
+  }
+
+
+  reset():void{
+    this.isServingStarted = false;
+    this.imageUrl = null;
+    this.isImageValid = false;
+    this.labelVisible = false;
+    this.classificationLabel = '';
+    this.uploadedImage = null;
   }
 
 

@@ -36,15 +36,16 @@
         </div>
 
         <!-- Start Training Button -->
-        <p><a class="btn btn-secondary" href="#" role="button" (click)="startTraining()">Start training &raquo;</a></p>
+        <p><button class="btn btn-secondary" role="button" (click)="startTraining()" [disabled]="!isUploadSuccessfull" >Start training &raquo;</button></p>
       </div>
+
       <div class="col-12 col-md-6">
         <h2>Test your model</h2>
-        <p>When the training is done, you can try your model. To start serving press on the Start button, then upload an
-          image and press on Classification. Right of the uploaded image the classification label will be displayed.
-          When you don't want to serve the model anymore, press on Stop model. </p>
+        <p>After the training process is complete, you can test your model. To begin serving, click the 'Serve model' button.
+          Then, upload an image and click 'Classify'. The classification label will be displayed to the right of
+          the uploaded image. If you wish to stop serving the model, simply click 'Stop Model'.</p>
         <div class="input-group mb-3">
-          <button class="btn btn-secondary me-3" type="button" (click)="startServing()">
+          <button class="btn btn-success me-3" type="button" [disabled]="!isTrainingFinished || isServingStarted" (click)="startServing()">
             Serve model &raquo;
           </button>
           <button class="btn btn-danger" type="button" [disabled]="!isServingStarted" (click)="stopServing()">
