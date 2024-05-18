@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "replace-vars": "node ./src/environments/replace_environment_variables.js",
-    "start": " npm run-script replace-vars  && ng serve",
+    "start": " ng serve",
     "build": " npm run-script replace-vars && ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
