@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: azurite-secret
+type: Opaque
+data:
+  CONNECTION_STRING: RGVmYXVsdEVuZHBvaW50c1Byb3RvY29sPWh0dHA7QWNjb3VudE5hbWU9ZGV2c3RvcmVhY2NvdW50MTtBY2NvdW50S2V5PUVieTh2ZE0wMnhOT2NxRmxxVXdKUExsbUV0bENEWEoxT1V6RlQ1MHVTUlo2SUZzdUZxMlVWRXJDejRJNnRxL0sxU1pGUFRPdHIvS0JIQmVrc29HTUd3PT07QmxvYkVuZHBvaW50PWh0dHA6Ly9henVyaXRlLXNlcnZpY2U6MTAwMDAvZGV2c3RvcmVhY2NvdW50MTtRdWV1ZUVuZHBvaW50PWh0dHA6Ly9henVyaXRlLXNlcnZpY2U6MTAwMDEvZGV2c3RvcmVhY2NvdW50MTtUYWJsZUVuZHBvaW50PWh0dHA6Ly9henVyaXRlLXNlcnZpY2U6MTAwMDIvZGV2c3RvcmVhY2NvdW50MTs=
+---
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: persistence-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: persistence-service
+  template:
+    metadata:
+      labels:
+        app: persistence-service
+    spec:
+      containers:
+      - name: persistence-service
+        image: ghcr.io/austriandatalab/ml-as-a-service:feature-persistence-service  # Replace this with remote eventually
+#        image: mlaas-service-persistence
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5000
+        env:
+        - name: CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: azurite-secret
+              key: CONNECTION_STRING
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: persistence-service
+spec:
+  selector:
+    app: persistence-service
+  ports:
+    - protocol: TCP
+      name: api
+      port: 5000
+      targetPort: 5000

@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "persistence.fullname" . }}-azurite
+  labels:
+  {{- include "persistence.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.azurite.replicas }}
+  selector:
+    matchLabels:
+      app: azurite
+    {{- include "persistence.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app: azurite
+      {{- include "persistence.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - env:
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ quote .Values.kubernetesClusterDomain }}
+        image: {{ .Values.azurite.azurite.image.repository }}:{{ .Values.azurite.azurite.image.tag
+          | default .Chart.AppVersion }}
+        name: azurite
+        ports:
+        - containerPort: 10000
+        - containerPort: 10001
+        - containerPort: 10002
+        resources: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "persistence.fullname" . }}-azurite-service
+  labels:
+  {{- include "persistence.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.azuriteService.type }}
+  selector:
+    app: azurite
+  {{- include "persistence.selectorLabels" . | nindent 4 }}
+  ports:
+	{{- .Values.azuriteService.ports | toYaml | nindent 2 }}

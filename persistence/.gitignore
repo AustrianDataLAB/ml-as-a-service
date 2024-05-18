@@ -1,0 +1,7 @@
+__pycache__/
+.pytest_cache/
+userdata/
+*.xml
+bin/
+tmp/
+.env

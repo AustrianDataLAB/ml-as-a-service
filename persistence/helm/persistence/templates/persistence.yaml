@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "persistence.fullname" . }}-azurite-secret
+  labels:
+  {{- include "persistence.labels" . | nindent 4 }}
+data:
+  CONNECTION_STRING: {{ required "azuriteSecret.connectionString is required" .Values.azuriteSecret.connectionString
+    | b64enc | quote }}
+type: Opaque
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "persistence.fullname" . }}-persistence-service
+  labels:
+  {{- include "persistence.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.persistenceService.replicas }}
+  selector:
+    matchLabels:
+      app: persistence-service
+    {{- include "persistence.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app: persistence-service
+      {{- include "persistence.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - env:
+        - name: CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              key: CONNECTION_STRING
+              name: {{ include "persistence.fullname" . }}-azurite-secret
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ quote .Values.kubernetesClusterDomain }}
+        image: {{ .Values.persistenceService.persistenceService.image.repository }}:{{
+          .Values.persistenceService.persistenceService.image.tag | default .Chart.AppVersion
+          }}
+        imagePullPolicy: {{ .Values.persistenceService.persistenceService.imagePullPolicy
+          }}
+        name: persistence-service
+        ports:
+        - containerPort: 5000
+        resources: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "persistence.fullname" . }}-persistence-service
+  labels:
+  {{- include "persistence.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.persistenceService.type }}
+  selector:
+    app: persistence-service
+  {{- include "persistence.selectorLabels" . | nindent 4 }}
+  ports:
+	{{- .Values.persistenceService.ports | toYaml | nindent 2 }}
