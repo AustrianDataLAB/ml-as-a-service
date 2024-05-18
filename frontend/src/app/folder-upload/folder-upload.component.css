@@ -2,3 +2,18 @@
   background-color: #eae3e3;
   height: 20rem;
 }
+
+.classification-label {
+  display: inline-block;
+  padding: 10px 20px;
+  margin-top: 10px;
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #495057;
+  transition: all 0.3s ease-in-out;
+}
+
+.classification-label span {
+  display: block;
+  text-align: center;
+}
