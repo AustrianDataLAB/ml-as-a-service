@@ -16,7 +16,8 @@ export class FolderUploadComponent {
   imageUrl: string | ArrayBuffer | null = null;
   isImageValid = false;
   labelVisible = false;
-  classificationLabel = 'Ubuntu animal';
+  classificationLabel = '';
+  uploadedImage: any;
 
   constructor(private uploadService: DataService, private toastrService: ToastrService) {
   }
@@ -58,7 +59,7 @@ export class FolderUploadComponent {
         return;
       }
       this.isImageValid = true;
-      this.labelVisible = true;
+      this.uploadedImage = file;
 
       const reader = new FileReader();
       reader.readAsDataURL(file);
@@ -90,12 +91,11 @@ export class FolderUploadComponent {
 
   classify(): void {
     if (this.isImageValid) {
-      //ToDo: change to be with calssify image request
-      this.uploadService.uploadFile(this.selectedFolder).subscribe({
+      this.uploadService.classify(this.uploadedImage).subscribe({
         next: (res) => {
-          this.toastrService.success('Folder uploaded successfully.');
-          console.log('File uploaded successfully:', res);
+          this.labelVisible = true;
           this.isUploadSuccessfull = true;
+          this.classificationLabel = res;
         },
         error: (err) => {
           this.toastrService.error('Error uploading file. Please try again.');
