@@ -467,7 +467,8 @@ def get_serving_deployment():
         )
         return (
             jsonify(
-                {"available": True if deployment.status.available_replicas else False}
+                {"available": True if deployment.status.available_replicas else False,
+                 "url": "https://" + os.getenv("DOMAIN") + "/serving/" + auth_header}
             ),
             200,
         )
@@ -494,16 +495,21 @@ def delete_serving_deployment():
             name="serving-" + auth_header, namespace=auth_header
         )
         logging.info(f"Serving deployment deleted successfully for {auth_header}")
-
+        # Delete the Service from the cluster
         core_v1_api.delete_namespaced_service(
             name="serving-" + auth_header, namespace=auth_header
         )
         logging.info(f"Serving service deleted successfully for {auth_header}")
-
+        # Delete the Ingress from the cluster
         networking_v1_api.delete_namespaced_ingress(
             name="serving-" + auth_header, namespace=auth_header
         )
         logging.info(f"Serving ingress deleted successfully for {auth_header}")
+        # Delete the ConfigMap from the cluster
+        core_v1_api.delete_namespaced_config_map(
+            name="serving-" + auth_header, namespace=auth_header
+        )
+
 
         return jsonify(), 200
     except ApiException as e:
