@@ -10,7 +10,6 @@ import uuid
 REQUIRED_ENV_VARS = [
     "TRAINING_IMAGE",
     "SERVING_IMAGE",
-    "NAMESPACE",
     "SERVING_PORT",
     "PERSISTENCE_SERVICE_URI",
     "DOMAIN",
@@ -47,8 +46,7 @@ networking_v1_api = client.NetworkingV1Api()
 # Create a Flask app
 app = Flask(__name__)
 
-
-#
+# Ensure that the namespace exists, if not create it
 def ensure_namespace_exists(namespace):
     try:
         core_v1_api.read_namespace(name=namespace)
@@ -60,6 +58,10 @@ def ensure_namespace_exists(namespace):
         else:
             raise
 
+@app.route('/', methods=["GET"])
+def alive():
+    # Implement check logic here
+    return jsonify(success=True), 200
 
 # Define a route to create a training job
 @app.route("/training", methods=["POST"])
@@ -524,4 +526,4 @@ def delete_serving_deployment():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=80, debug=False)

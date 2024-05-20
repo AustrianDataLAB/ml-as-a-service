@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ml-as-a-service.fullname" . }}-operator
+  labels:
+    {{- include "ml-as-a-service.labels" . | nindent 4 }}
+data:
+  TRAINING_IMAGE: {{ .Values.operator.config.training.image }}
+  SERVING_IMAGE: {{ .Values.operator.config.serving.image }}
+  SERVING_PORT: {{ .Values.operator.config.serving.port | quote }}
+  DOMAIN: {{ .Values.operator.config.domain }}
+  PERSISTENCE_SERVICE_URI: persistence.{{ .Release.Namespace }}.svc.cluster.local

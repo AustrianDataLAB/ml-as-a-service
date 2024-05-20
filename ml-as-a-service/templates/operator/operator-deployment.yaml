@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ml-as-a-service.fullname" . }}-operator
+  labels:
+    {{- include "ml-as-a-service.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.operator.autoscaling.enabled }}
+  replicas: {{ .Values.operator.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "ml-as-a-service.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.operator.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "ml-as-a-service.labels" . | nindent 8 }}
+        {{- with .Values.operator.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.operator.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "ml-as-a-service.serviceAccountName" . }}-operator
+      securityContext:
+        {{- toYaml .Values.operator.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.operator.securityContext | nindent 12 }}
+          image: "{{ .Values.operator.image.repository }}:{{ .Values.operator.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.operator.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.operator.service.port }}
+              protocol: TCP
+          env:
+            - name: TRAINING_IMAGE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "ml-as-a-service.fullname" . }}-operator
+                  key: TRAINING_IMAGE
+            - name: SERVING_IMAGE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "ml-as-a-service.fullname" . }}-operator
+                  key: SERVING_IMAGE
+            - name: SERVING_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "ml-as-a-service.fullname" . }}-operator
+                  key: SERVING_PORT
+            - name: DOMAIN
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "ml-as-a-service.fullname" . }}-operator
+                  key: DOMAIN
+            - name: PERSISTENCE_SERVICE_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "ml-as-a-service.fullname" . }}-operator
+                  key: PERSISTENCE_SERVICE_URI
+          livenessProbe:
+            {{- toYaml .Values.operator.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.operator.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.operator.resources | nindent 12 }}
+          {{- with .Values.operator.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.operator.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.operator.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.operator.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.operator.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
