@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    name: frontend
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: frontend
+  template:
+    metadata:
+      labels:
+        name: frontend
+    spec:
+      containers:
+        - image: ghcr.io/austriandatalab/ml-as-a-service:feature-frontend
+          name: frontend
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4200

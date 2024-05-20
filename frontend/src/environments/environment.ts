@@ -1,4 +1,4 @@
 export const environment =
   {
-    API_URL: '${BACKEND_URL}:${BACKEND_PORT}'
+    API_URL: 'http://localhost:5000'
   };

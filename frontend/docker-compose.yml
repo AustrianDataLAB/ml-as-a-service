@@ -3,8 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        BACKEND_API_PORT: 5000
-        BACKEND_API_URL: http://localhost
+    image: mlaas-service-frontend:latest
     ports:
       - "4200:4200"
+    environment:
+      - BACKEND_API_PORT=5000;BACKEND_API_URL=http://localhost
