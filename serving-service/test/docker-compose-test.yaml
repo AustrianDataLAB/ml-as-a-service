@@ -11,7 +11,8 @@ services:
       dockerfile: ./test/Dockerfile.test
     image: serving-test
     environment:
-      - PERSISTENCE_SERVICE_URL=127.0.0.1:5000
+      - PERSISTENCE_SERVICE_URI=http://persistence-service.mlaas.svc.cluster.local:5000
+      - TENANT=Auth_type <token>
     volumes:
       - ./test-results:/serving/test/test-results
     networks:
