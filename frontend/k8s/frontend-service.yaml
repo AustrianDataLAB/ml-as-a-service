@@ -8,5 +8,5 @@ spec:
   ports:
     - protocol: TCP
       name: api
-      port: 4200
-      targetPort: 4200
+      port: 80
+      targetPort: 80

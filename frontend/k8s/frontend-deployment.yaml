@@ -19,4 +19,4 @@ spec:
           name: frontend
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 4200
+            - containerPort: 80
