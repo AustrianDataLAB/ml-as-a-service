@@ -17,6 +17,6 @@ spec:
       containers:
         - image: ghcr.io/austriandatalab/ml-as-a-service:feature-frontend
           name: frontend
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
