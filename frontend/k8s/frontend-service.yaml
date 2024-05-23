@@ -7,6 +7,5 @@ spec:
     app: frontend
   ports:
     - protocol: TCP
-      name: api
       port: 80
       targetPort: 80

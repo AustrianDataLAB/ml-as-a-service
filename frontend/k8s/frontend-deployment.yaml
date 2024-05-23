@@ -8,11 +8,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      name: frontend
+      app: frontend
   template:
     metadata:
       labels:
-        name: frontend
+        app: frontend
     spec:
       containers:
         - image: ghcr.io/austriandatalab/ml-as-a-service:feature-frontend
