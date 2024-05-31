@@ -98,8 +98,9 @@ export class FolderUploadComponent {
       console.log('Start training');
       this.uploadService.startTraining().subscribe({
         next: (res) => {
+          const id = res.id;
           this.toastrService.success('Started training successfully.');
-          this.isTrainingFinished = true;
+          this.pollStatus(id);
         },
         error: (err) => {
           this.toastrService.error('Error starting training. Please try again.');
@@ -108,6 +109,26 @@ export class FolderUploadComponent {
       });
 
     }
+  }
+
+  pollStatus(id: number): void {
+    this.uploadService.getTrainingStatus(id).subscribe({
+      next: (res) => {
+        console.log('Training status:', res);
+        if (res.status === 'Succeeded') {
+          this.isTrainingFinished = true;
+          this.toastrService.success('Training finished successfully.');
+        } else if(res.status === 'Failed') {
+          this.toastrService.error('Training failed. Please try again.');
+        } else {
+          setTimeout(() => this.pollStatus(id), 5000);
+        }
+      },
+      error: (err) => {
+        this.toastrService.error('Error getting training status. Please try again.');
+        console.error('Error getting training status:', err);
+      }
+    });
   }
 
   startServing(): void {

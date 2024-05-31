@@ -2,6 +2,8 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {Observable} from "rxjs";
+import {TrainingResponse} from "../dto/TrainingResponse";
+import {JobStatusResponse} from "../dto/JobStatusResponse";
 
 @Injectable({
   providedIn: 'root'
@@ -26,7 +28,11 @@ export class DataService {
   }
 
   startTraining() {
-    return this.http.post(this.training_url, {});
+    return this.http.post<TrainingResponse>(this.training_url, {});
+  }
+
+  getTrainingStatus(id: number) {
+    return this.http.get<JobStatusResponse>(this.training_url+'/'+id);
   }
 
   startServing() {
