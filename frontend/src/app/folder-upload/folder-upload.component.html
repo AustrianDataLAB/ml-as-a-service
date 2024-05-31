@@ -29,7 +29,7 @@
             <input type="file" class="custom-file-input" id="folderUpload" (change)="onFolderSelected($event)">
           </div>
           <div class="input-group-append">
-            <button class="btn btn-outline-secondary" type="button" [disabled]="(isFolderValid && isTrainingRunning) || (!isFolderValid && !isTrainingRunning)" (click)="onUpload()">
+            <button class="btn btn-outline-secondary" type="button" [disabled]="!isFolderValid ||(isFolderValid && isTrainingRunning)" (click)="onUpload()">
               Upload
             </button>
           </div>

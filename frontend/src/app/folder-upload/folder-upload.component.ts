@@ -28,6 +28,7 @@ export class FolderUploadComponent {
   onFolderSelected(event: Event): void {
     console.log(this.isTrainingFinished)
     console.log(this.isServingStarted)
+    this.isFolderValid = false;
     const target = event.target as HTMLInputElement;
     const file: File = (target.files as FileList)[0];
 
@@ -101,9 +102,11 @@ export class FolderUploadComponent {
       this.uploadService.startTraining().subscribe({
         next: (res) => {
           const id = res.id;
+
+          this.isTrainingFinished = false;
+          this.isTrainingRunning= true;
           console.log(this.isTrainingRunning)
           console.log(this.isFolderValid)
-          this.isTrainingRunning= true;
           this.toastrService.success('Started training successfully.');
           this.pollStatus(id);
         },
@@ -122,8 +125,10 @@ export class FolderUploadComponent {
         console.log('Training status:', res);
         if (res.status === 'Succeeded') {
           this.isTrainingFinished = true;
+          this.isTrainingRunning = false;
           this.toastrService.success('Training finished successfully.');
         } else if(res.status === 'Failed') {
+          this.isTrainingRunning = false;
           this.toastrService.error('Training failed. Please try again.');
         } else {
           setTimeout(() => this.pollStatus(id), 5000);
