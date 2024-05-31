@@ -51,6 +51,30 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Selector labels for operator
+*/}}
+{{- define "ml-as-a-service.selectorLabelsOperator" -}}
+app.kubernetes.io/name: {{ include "ml-as-a-service.name" . }}-operator
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+Selector labels for persistence
+*/}}
+{{- define "ml-as-a-service.selectorLabelsPersistence" -}}
+app.kubernetes.io/name: {{ include "ml-as-a-service.name" . }}-persistence
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+Selector labels for operator
+*/}}
+{{- define "ml-as-a-service.selectorLabelsFrontend" -}}
+app.kubernetes.io/name: {{ include "ml-as-a-service.name" . }}-frontend
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
 Create the name of the service account to use for operator
 */}}
 {{- define "ml-as-a-service.serviceAccountName" -}}

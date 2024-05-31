@@ -10,7 +10,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "ml-as-a-service.selectorLabels" . | nindent 6 }}
+      {{- include "ml-as-a-service.selectorLabelsOperator" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.operator.podAnnotations }}
@@ -18,7 +18,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "ml-as-a-service.labels" . | nindent 8 }}
+        {{- include "ml-as-a-service.selectorLabelsOperator" . | nindent 8 }}
         {{- with .Values.operator.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
