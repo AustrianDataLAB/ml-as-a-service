@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: serving-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: serving-service
+  template:
+    metadata:
+      labels:
+        app: serving-service
+    spec:
+      containers:
+      - name: serving-service
+        image: ghcr.io/austriandatalab/ml-as-a-service:feature-serving-service  # Replace this with remote eventually
+#        image: mlaas-service-serving
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5001
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: serving-service
+spec:
+  selector:
+    app: serving-service
+  ports:
+    - protocol: TCP
+      name: api
+      port: 5001
+      targetPort: 5001
