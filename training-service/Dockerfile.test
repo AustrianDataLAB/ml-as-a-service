@@ -1,13 +1,18 @@
 FROM python:latest
 
+RUN pip install --upgrade pip
+RUN apt-get update && apt-get install -y libhdf5-dev
+
 WORKDIR /app
 
 COPY ./requirements.txt .
 
 RUN pip install -r requirements.txt
 
-COPY ./model-training.py .
+COPY ./.env .
+
+COPY ./src/* .
 
 RUN mkdir -p /app/data
 
-CMD [ "python", "model-training.py" ]
+CMD [ "python", "training-service.py" ]
