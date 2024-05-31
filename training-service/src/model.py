@@ -73,6 +73,6 @@ def create_model(data_dir, train_ds, val_ds, config):
     return model, class_names
 
 
-def train_model(model, train_ds, val_ds, epochs=10):
+def train_model(model, train_ds, val_ds, epochs=20):
     history = model.fit(train_ds, validation_data=val_ds, epochs=epochs)
     return history
