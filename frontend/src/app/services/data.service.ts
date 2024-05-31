@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {Observable} from "rxjs";
-import {TrainingResponse} from "../dto/TrainingResponse";
+import {IdResponse} from "../dto/IdResponse";
 import {JobStatusResponse} from "../dto/JobStatusResponse";
 
 @Injectable({
@@ -28,7 +28,7 @@ export class DataService {
   }
 
   startTraining() {
-    return this.http.post<TrainingResponse>(this.training_url, {});
+    return this.http.post<IdResponse>(this.training_url, {});
   }
 
   getTrainingStatus(id: number) {
@@ -36,17 +36,17 @@ export class DataService {
   }
 
   startServing() {
-    return this.http.post(this.serving_url, {});
+    return this.http.post<IdResponse>(this.serving_url, {});
   }
 
   stopServing() {
     return this.http.delete(this.serving_url);
   }
 
-  classify(image: File): Observable<any> {
+  classify(image: File, id:number): Observable<any> {
     const formData = new FormData();
     formData.append('file', image);
-    return this.http.post(this.inference_url, formData, {responseType: 'text'});
+    return this.http.post(this.inference_url+'/'+id, formData, {responseType: 'text'});
   }
 
 }

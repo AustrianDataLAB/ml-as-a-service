@@ -19,6 +19,8 @@ export class FolderUploadComponent {
   classificationLabel = '';
   uploadedImage: any;
   isTrainingFinished = false;
+  isTrainingRunning = false;
+  servingId: number = 0;
 
   constructor(private uploadService: DataService, private toastrService: ToastrService) {
   }
@@ -99,6 +101,9 @@ export class FolderUploadComponent {
       this.uploadService.startTraining().subscribe({
         next: (res) => {
           const id = res.id;
+          console.log(this.isTrainingRunning)
+          console.log(this.isFolderValid)
+          this.isTrainingRunning= true;
           this.toastrService.success('Started training successfully.');
           this.pollStatus(id);
         },
@@ -136,6 +141,7 @@ export class FolderUploadComponent {
     this.uploadService.startServing().subscribe({
       next: (res) => {
         this.toastrService.success('Started serving successfully.');
+        this.servingId = res.id;
         this.isServingStarted = true;
       },
       error: (err) => {
@@ -164,7 +170,7 @@ export class FolderUploadComponent {
 
   classify(): void {
     if (this.isImageValid) {
-      this.uploadService.classify(this.uploadedImage).subscribe({
+      this.uploadService.classify(this.uploadedImage, this.servingId).subscribe({
         next: (res) => {
           this.labelVisible = true;
           this.classificationLabel = res;
