@@ -20,8 +20,8 @@
     <div class="row">
       <div class="col-12 col-md-6">
         <h2>Train your model</h2>
-        <p>Simply upload your images as a compressed folder. <br>Once done, click "Start Training" to begin the training
-          process.</p>
+        <p>Simply upload your images as a compressed folder. Once done, click "Start Training" to begin the training
+          process. Wait until a pop-up message appears, indicating that the training process is finished, so that you can start serving your model.</p>
 
         <!-- File Upload Button -->
         <div class="input-group mb-3">
@@ -29,14 +29,14 @@
             <input type="file" class="custom-file-input" id="folderUpload" (change)="onFolderSelected($event)">
           </div>
           <div class="input-group-append">
-            <button class="btn btn-outline-secondary" type="button" [disabled]="!isFolderValid ||(isFolderValid && isTrainingRunning)" (click)="onUpload()">
+            <button class="btn btn-outline-secondary" type="button" [disabled]="!isFolderValid" (click)="onUpload()">
               Upload
             </button>
           </div>
         </div>
 
         <!-- Start Training Button -->
-        <p><button class="btn btn-secondary" role="button" (click)="startTraining()" [disabled]="!isUploadSuccessfull" >Start training &raquo;</button></p>
+        <p><button class="btn btn-secondary" role="button" (click)="startTraining()" [disabled]="!isUploadSuccessfull ||isTrainingRunning" >Start training &raquo;</button></p>
       </div>
 
       <div class="col-12 col-md-6">
