@@ -12,5 +12,5 @@ spec:
       protocol: TCP
       name: http
   selector:
-    {{- include "ml-as-a-service.selectorLabelsOperator" . | nindent 4 }}
+    {{- include "ml-as-a-service.selectorLabelsFrontend" . | nindent 4 }}
 

@@ -138,10 +138,10 @@ frontend:
   enabled: true
   replicaCount: 1
   image:
-    repository: frontend
+    repository: ghcr.io/austriandatalab/ml-as-a-service
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "latest"
+    tag: "feature-frontend"
 
   podAnnotations: {}
   podLabels: {}
@@ -160,6 +160,7 @@ frontend:
   service:
     type: ClusterIP
     port: 80
+    targetport: 80
 
   ingress:
     enabled: false

@@ -67,7 +67,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Selector labels for operator
+Selector labels for frontend
 */}}
 {{- define "ml-as-a-service.selectorLabelsFrontend" -}}
 app.kubernetes.io/name: {{ include "ml-as-a-service.name" . }}-frontend

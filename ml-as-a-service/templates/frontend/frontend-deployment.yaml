@@ -4,35 +4,35 @@ metadata:
   labels: {{- include "ml-as-a-service.labels" . | nindent 4 }}
   name: {{ include "ml-as-a-service.fullname" . }}-frontend
 spec:
-  { { - if not .Values.frontend.autoscaling.enabled } }
-  replicas: { { .Values.frontend.replicaCount } }
-  { { - end } }
+  {{- if not .Values.frontend.autoscaling.enabled }}
+  replicas: {{ .Values.frontend.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
-      {{- include "ml-as-a-service.selectorLabelsOperator" . | nindent 6 }}
+      {{- include "ml-as-a-service.selectorLabelsFrontend" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.frontend.podAnnotations }}
       annotations:
-        { { - toYaml . | nindent 8 } }
-      { { - end } }
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       labels:
-        { { - include "ml-as-a-service.selectorLabelsOperator" . | nindent 8 } }
-          { { - with .Values.frontend.podLabels } }
-          { { - toYaml . | nindent 8 } }
-          { { - end } }
+        {{- include "ml-as-a-service.selectorLabelsFrontend" . | nindent 8 }}
+        {{- with .Values.frontend.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: { { .Values.frontend.image.pullPolicy } }
+          image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: { { .Values.frontend.service.port } }
+              containerPort: {{ .Values.frontend.service.port }}
               protocol: TCP
           livenessProbe:
-            { { - toYaml .Values.frontend.livenessProbe | nindent 12 } }
+            {{- toYaml .Values.frontend.livenessProbe | nindent 12 }}
           readinessProbe:
-            { { - toYaml .Values.frontend.readinessProbe | nindent 12 } }
+            {{- toYaml .Values.frontend.readinessProbe | nindent 12 }}
           resources:
-            { { - toYaml .Values.frontend.resources | nindent 12 } }
+            {{- toYaml .Values.frontend.resources | nindent 12 }}
