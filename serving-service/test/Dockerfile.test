@@ -1,0 +1,24 @@
+FROM python:latest
+
+RUN mkdir /serving
+WORKDIR /serving
+
+RUN mkdir test
+RUN mkdir test/data
+
+COPY ./test/data/ test/data/
+
+COPY ./test/requirements.txt test/
+COPY ./requirements.txt .
+
+RUN pip install -r test/requirements.txt --user
+RUN pip install -r requirements.txt --user
+
+COPY test/serving-test.py test/
+COPY test/__init__.py test/__init__.py
+
+COPY ./__init__.py .
+COPY ./main.py .
+
+WORKDIR /serving/test
+CMD ["python3", "-m", "pytest -v", "serving-test.py"]
