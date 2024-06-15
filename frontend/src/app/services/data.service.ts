@@ -46,7 +46,7 @@ export class DataService {
   classify(image: File, id:number): Observable<any> {
     const formData = new FormData();
     formData.append('file', image);
-    return this.http.post(this.inference_url+'/'+id, formData, {responseType: 'text'});
+    return this.http.post(this.serving_url+'/'+id+'/infer', formData, {responseType: 'text'}); //serving/id/infer
   }
 
 }
