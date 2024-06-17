@@ -6,6 +6,8 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
+################ OPERATOR ################
+
 operator:
   enabled: true
   config:
@@ -134,6 +136,8 @@ operator:
   affinity: {}
 
 
+################ FRONTEND ################
+
 frontend:
   enabled: true
   replicaCount: 1
@@ -224,3 +228,36 @@ frontend:
   tolerations: []
 
   affinity: {}
+
+
+################ PERSISTENCE ################
+persistence:
+  enabled: true
+
+  azurite:
+    image:
+      repository: mcr.microsoft.com/azure-storage/azurite
+      tag: latest
+    replicas: 1
+
+  azuriteSecret:
+    connectionString: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite-service:10000/devstoreaccount1;QueueEndpoint=http://azurite-service:10001/devstoreaccount1;TableEndpoint=http://azurite-service:10002/devstoreaccount1;"
+  
+  azuriteService:
+    ports:
+      blob: 10000
+      queue: 10001
+      table: 10002
+    type: ClusterIP
+
+    kubernetesClusterDomain: cluster.local
+
+  persistenceService:
+    image:
+      repository: ghcr.io/austriandatalab/ml-as-a-service
+      tag: feature-persistence-service
+    imagePullPolicy: IfNotPresent
+    ports:
+      api: 5000
+    replicas: 1
+    type: ClusterIP
