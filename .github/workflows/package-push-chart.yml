@@ -1,0 +1,48 @@
+name: Package and Push Helm Chart
+
+on:
+  push:
+    branches:
+      - main
+      - feature/helm
+
+env:
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  ORGANIZATION: austriandatalab
+
+jobs:
+  package_and_push_chart:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v1
+        with:
+          version: '3'
+
+      - name: Package Helm Chart and get the name
+        run: |
+          helm package ml-as-a-service
+          mv ml-as-a-service-*.tgz ./ # Move the packaged chart to the root directory for easier access
+
+      - name: Get Helm Chart Name
+        id: helm_chart_name
+        run: echo "HELM_CHART_NAME=$(ls ml-as-a-service-*.tgz)" >> $GITHUB_ENV
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push Helm Chart to OCI
+        run: |
+          cd ml-as-a-service
+          export HELM_CHART_NAME=$(ls ml-as-a-service-*.tgz)
+          helm push ${{ env.HELM_CHART_NAME }} oci://${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/ml-as-a-service
