@@ -42,6 +42,5 @@ jobs:
 
       - name: Push Helm Chart to OCI
         run: |
-          cd ml-as-a-service
           export HELM_CHART_NAME=$(ls ml-as-a-service-*.tgz)
           helm push ${{ env.HELM_CHART_NAME }} oci://${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/ml-as-a-service
