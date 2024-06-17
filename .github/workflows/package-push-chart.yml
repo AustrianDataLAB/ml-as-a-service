@@ -38,7 +38,6 @@ jobs:
           echo "${{ secrets.GHCR_TOKEN }}" | helm registry login -u ${{ github.actor }} --password-stdin ${{ env.REGISTRY }}
 
       - name: Push Helm Chart to OCI
-        env:
-          HELM_EXPERIMENTAL_OCI: 1
         run: |
+          export HELM_EXPERIMENTAL_OCI=1
           helm push ${{ env.HELM_CHART_NAME }} oci://${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/ml-as-a-service
