@@ -41,5 +41,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push Helm Chart to OCI
+        env:
+          HELM_EXPERIMENTAL_OCI: 1
         run: |
           helm push ${{ env.HELM_CHART_NAME }} oci://${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/ml-as-a-service
