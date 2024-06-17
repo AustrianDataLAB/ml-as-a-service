@@ -5,6 +5,7 @@
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
+kubernetesClusterDomain: cluster.local
 
 ################ OPERATOR ################
 
@@ -261,3 +262,21 @@ persistence:
       api: 5000
     replicas: 1
     type: ClusterIP
+
+
+################ TRAINING ################
+
+
+
+
+################ SERVING ################
+
+servingService:
+  ports:
+    api: 5001
+  replicas: 1
+  image:
+    repository: ghcr.io/austriandatalab/ml-as-a-service
+    tag: feature-serving-service
+  imagePullPolicy: IfNotPresent
+  type: ClusterIP

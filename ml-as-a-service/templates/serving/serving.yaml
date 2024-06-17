@@ -1,44 +1,46 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "ml-as-a-service.fullname" . }}-azurite
+  name: {{ include "ml-as-a-service.fullname" . }}-serving-service
   labels:
   {{- include "ml-as-a-service.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.persistence.azurite.replicas }}
+  replicas: {{ .Values.servingService.replicas }}
   selector:
     matchLabels:
-      app: azurite
+      app: serving-service
     {{- include "ml-as-a-service.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app: azurite
+        app: serving-service
       {{- include "ml-as-a-service.selectorLabels" . | nindent 8 }}
     spec:
       containers:
       - env:
         - name: KUBERNETES_CLUSTER_DOMAIN
           value: {{ quote .Values.kubernetesClusterDomain }}
-        image: {{ .Values.persistence.azurite.image.repository }}:{{ .Values.persistence.azurite.image.tag
+        image: {{ .Values.servingService.image.repository }}:{{ .Values.servingService.image.tag
           | default .Chart.AppVersion }}
-        name: azurite
+        imagePullPolicy: {{ .Values.servingService.imagePullPolicy }}
+        name: serving-service
         ports:
-        - containerPort: 10000
-        - containerPort: 10001
-        - containerPort: 10002
+        - containerPort: 5001
         resources: {}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "ml-as-a-service.fullname" . }}-azurite-service
+  name: {{ include "ml-as-a-service.fullname" . }}-serving-service
   labels:
   {{- include "ml-as-a-service.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.persistence.azuriteService.type }}
+  type: {{ .Values.servingService.type }}
   selector:
-    app: azurite
+    app: serving-service
   {{- include "ml-as-a-service.selectorLabels" . | nindent 4 }}
   ports:
-	{{- .Values.persistence.azuriteService.ports | toYaml | nindent 2 }}
+    - name: api
+      port: {{ .Values.servingService.ports.api }}
+      protocol: TCP
+      targetPort: 5001
