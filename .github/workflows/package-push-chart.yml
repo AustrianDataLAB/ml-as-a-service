@@ -28,7 +28,6 @@ jobs:
       - name: Package Helm Chart and get the name
         run: |
           helm package ml-as-a-service
-          mv ml-as-a-service-*.tgz ./ # Move the packaged chart to the root directory for easier access
 
       - name: Get Helm Chart Name
         id: helm_chart_name
