@@ -41,4 +41,4 @@ jobs:
       - name: Push Helm Chart to OCI
         run: |
           export HELM_EXPERIMENTAL_OCI=1
-          helm push ${{ env.HELM_CHART_NAME }} oci://${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/ml-as-a-service/ml-as-a-service
+          helm push ${{ env.HELM_CHART_NAME }} oci://${{ env.REGISTRY }}/${{ env.ORGANIZATION }}
