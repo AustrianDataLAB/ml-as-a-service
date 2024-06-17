@@ -33,12 +33,9 @@ jobs:
         id: helm_chart_name
         run: echo "HELM_CHART_NAME=$(ls ml-as-a-service-*.tgz)" >> $GITHUB_ENV
 
-      - name: Log in to the Container registry
-        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+       - name: Log in to the Container registry
+          run: |
+            echo "${{ secrets.GHCR_TOKEN }}" | helm registry login -u ${{ github.actor }} --password-stdin ${{ env.REGISTRY }}
 
       - name: Push Helm Chart to OCI
         env:
