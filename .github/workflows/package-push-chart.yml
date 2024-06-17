@@ -35,7 +35,7 @@ jobs:
 
        - name: Log in to the Container registry
           run: |
-            echo "${{ secrets.GHCR_TOKEN }}" | helm registry login -u ${{ github.actor }} --password-stdin ${{ env.REGISTRY }}
+          echo "${{ secrets.GHCR_TOKEN }}" | helm registry login -u ${{ github.actor }} --password-stdin ${{ env.REGISTRY }}
 
       - name: Push Helm Chart to OCI
         env:
