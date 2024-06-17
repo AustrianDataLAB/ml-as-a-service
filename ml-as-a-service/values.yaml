@@ -266,7 +266,15 @@ persistence:
 
 ################ TRAINING ################
 
-
+trainingService:
+  ports:
+    api: 5000
+  replicas: 1
+  image:
+    repository: ghcr.io/austriandatalab/ml-as-a-service
+    tag: feature-training-service
+  imagePullPolicy: IfNotPresent
+  type: ClusterIP
 
 
 ################ SERVING ################

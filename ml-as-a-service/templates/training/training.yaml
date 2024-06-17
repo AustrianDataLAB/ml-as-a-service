@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ml-as-a-service.fullname" . }}-training-service
+  labels:
+  {{- include "ml-as-a-service.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.trainingService.replicas }}
+  selector:
+    matchLabels:
+      app: training-service
+    {{- include "ml-as-a-service.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app: training-service
+      {{- include "ml-as-a-service.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - env:
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ quote .Values.kubernetesClusterDomain }}
+        image: {{ .Values.trainingService.image.repository }}:{{ .Values.trainingService.image.tag
+          | default .Chart.AppVersion }}
+        imagePullPolicy: {{ .Values.trainingService.imagePullPolicy }}
+        name: training-service
+        ports:
+        - containerPort: 5000
+        resources: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ml-as-a-service.fullname" . }}-training-service
+  labels:
+  {{- include "ml-as-a-service.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.trainingService.type }}
+  selector:
+    app: training-service
+  {{- include "ml-as-a-service.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: api
+      port: {{ .Values.trainingService.ports.api }}
+      protocol: TCP
+      targetPort: 5001

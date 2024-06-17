@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "training.fullname" . }}-training-service
+  labels:
+  {{- include "training.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.trainingService.replicas }}
+  selector:
+    matchLabels:
+      app: training-service
+    {{- include "training.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app: training-service
+      {{- include "training.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - env:
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ quote .Values.kubernetesClusterDomain }}
+        image: {{ .Values.trainingService.trainingService.image.repository }}:{{ .Values.trainingService.trainingService.image.tag
+          | default .Chart.AppVersion }}
+        imagePullPolicy: {{ .Values.trainingService.trainingService.imagePullPolicy }}
+        name: training-service
+        ports:
+        - containerPort: 5000
+        resources: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "training.fullname" . }}-training-service
+  labels:
+  {{- include "training.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.trainingService.type }}
+  selector:
+    app: training-service
+  {{- include "training.selectorLabels" . | nindent 4 }}
+  ports:
+	{{- .Values.trainingService.ports | toYaml | nindent 2 }}
