@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ include "ml-as-a-service.fullname" . }}-persistence
-  labels:
-    {{- include "ml-as-a-service.labels" . | nindent 4 }}
-data:
-  CONNECTION_STRING: {{.Values.persistence.connectionString}}

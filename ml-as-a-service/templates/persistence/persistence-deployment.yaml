@@ -41,31 +41,11 @@ spec:
               containerPort: {{ .Values.persistence.service.port }}
               protocol: TCP
           env:
-            - name: TRAINING_IMAGE
+            - name: CONNECTION_STRING
               valueFrom:
-                configMapKeyRef:
-                  name: {{ include "ml-as-a-service.fullname" . }}-persistence
-                  key: TRAINING_IMAGE
-            - name: SERVING_IMAGE
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ include "ml-as-a-service.fullname" . }}-persistence
-                  key: SERVING_IMAGE
-            - name: SERVING_PORT
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ include "ml-as-a-service.fullname" . }}-persistence
-                  key: SERVING_PORT
-            - name: DOMAIN
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ include "ml-as-a-service.fullname" . }}-persistence
-                  key: DOMAIN
-            - name: PERSISTENCE_SERVICE_URI
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ include "ml-as-a-service.fullname" . }}-persistence
-                  key: PERSISTENCE_SERVICE_URI
+                secretKeyRef:
+                  name: {{ .Values.persistence.connectionStringSecretName }}
+                  key: string
           livenessProbe:
             {{- toYaml .Values.persistence.livenessProbe | nindent 12 }}
           readinessProbe:

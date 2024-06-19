@@ -235,7 +235,7 @@ frontend:
 
 ################ PERSISTENCE ################
 persistence:
-  connectionString: "test123"
+  connectionStringSecretName: "mlaas-connection-string"
 
   enabled: true
   replicaCount: 1
