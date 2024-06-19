@@ -74,7 +74,7 @@ operator:
     port: 80
 
   ingress:
-    enabled: false
+    enabled: true
     className: "nginx-static"
     annotations: {}
       # kubernetes.io/ingress.class: nginx
@@ -170,7 +170,7 @@ frontend:
     targetport: 80
 
   ingress:
-    enabled: false
+    enabled: true
     className: "nginx-static"
     annotations: {}
       # kubernetes.io/ingress.class: nginx
@@ -276,7 +276,7 @@ persistence:
     targetport: 80
 
   ingress:
-    enabled: false
+    enabled: true
     className: "nginx-static"
     annotations: {}
       # kubernetes.io/ingress.class: nginx
