@@ -32,7 +32,7 @@ export class FolderUploadComponent {
 
     if (file) {
       console.log("file type:" + file.type)
-      if (file.type !== 'application/zip') {
+      if (file.type !== 'application/zip' && file.type !== 'application/x-zip-compressed') {
         console.error('Invalid file type. Please upload a zip file.');
         this.toastrService.error('Invalid file type. Please upload a zip file.');
         return;
