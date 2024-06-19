@@ -9,4 +9,4 @@ data:
   SERVING_IMAGE: {{ .Values.operator.config.serving.image }}
   SERVING_PORT: {{ .Values.operator.config.serving.port | quote }}
   DOMAIN: {{ .Values.operator.config.domain }}
-  PERSISTENCE_SERVICE_URI: persistence.{{ .Release.Namespace }}.svc.cluster.local
+  PERSISTENCE_SERVICE_URI: {{ include "ml-as-a-service.fullname" . }}-persistence.{{ .Release.Namespace }}.svc.cluster.local

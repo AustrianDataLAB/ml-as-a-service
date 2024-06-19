@@ -67,7 +67,7 @@ def alive():
 @app.route("/training", methods=["POST"])
 def create_training_job():
     # Fetch authorization-header
-    auth_header = request.headers.get("Authorization")
+    auth_header = request.headers.get("x-auth-request-user")
     random_uuid = str(uuid.uuid4())
 
     # Check if the Job already exists and is in a running state
@@ -199,7 +199,7 @@ def create_training_job():
 @app.route("/training", methods=["GET"])
 def get_training_jobs():
     # Fetch authorization-header
-    auth_header = request.headers.get("Authorization")
+    auth_header = request.headers.get("x-auth-request-user")
 
     try:
         # List all jobs in the namespace
@@ -244,7 +244,7 @@ def get_training_jobs():
 @app.route("/training/<id>", methods=["GET"])
 def get_training_job(id):
     # Fetch authorization-header
-    auth_header = request.headers.get("Authorization")
+    auth_header = request.headers.get("x-auth-request-user")
 
     try:
         # Fetch the Job from the cluster
@@ -278,7 +278,7 @@ def get_training_job(id):
 @app.route("/serving", methods=["POST"])
 def create_serving_deployment():
     # Fetch authorization-header
-    auth_header = request.headers.get("Authorization")
+    auth_header = request.headers.get("x-auth-request-user")
 
     # Check if the Deployment already exists
     try:
@@ -388,6 +388,7 @@ def create_serving_deployment():
         metadata=client.V1ObjectMeta(
             name="serving-" + auth_header,
             labels={"app": "serving", "tenant": auth_header},
+            annotations={"nginx.ingress.kubernetes.io/rewrite-target: /"}
         ),
         spec=client.V1IngressSpec(
             rules=[
@@ -446,7 +447,7 @@ def create_serving_deployment():
 @app.route("/serving", methods=["GET"])
 def get_serving_deployment():
     # Fetch authorization-header
-    auth_header = request.headers.get("Authorization")
+    auth_header = request.headers.get("x-auth-request-user")
 
     try:
         # Fetch the Deployment from the cluster
@@ -489,7 +490,7 @@ def get_serving_deployment():
 @app.route("/serving", methods=["DELETE"])
 def delete_serving_deployment():
     # Fetch authorization-header
-    auth_header = request.headers.get("Authorization")
+    auth_header = request.headers.get("x-auth-request-user")
 
     try:
         # Delete the Deployment from the cluster
