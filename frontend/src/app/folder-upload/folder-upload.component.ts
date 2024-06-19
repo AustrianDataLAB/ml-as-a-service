@@ -31,6 +31,7 @@ export class FolderUploadComponent {
     const file: File = (target.files as FileList)[0];
 
     if (file) {
+      console.log("file type:" + file.type)
       if (file.type !== 'application/zip') {
         console.error('Invalid file type. Please upload a zip file.');
         this.toastrService.error('Invalid file type. Please upload a zip file.');
