@@ -273,7 +273,7 @@ persistence:
   service:
     type: ClusterIP
     port: 80
-    targetport: 80
+    targetport: 5000
 
   ingress:
     enabled: true
@@ -308,11 +308,11 @@ persistence:
   livenessProbe:
     httpGet:
       path: /healthcheck
-      port: http
+      port: 5000
   readinessProbe:
     httpGet:
       path: /healthcheck
-      port: http
+      port: 5000
 
   autoscaling:
     enabled: false

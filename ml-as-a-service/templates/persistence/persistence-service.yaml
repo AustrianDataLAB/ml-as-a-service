@@ -8,7 +8,7 @@ spec:
   type: {{ .Values.persistence.service.type }}
   ports:
     - port: {{ .Values.persistence.service.port }}
-      targetPort: http
+      targetPort: {{ .Values.persistence.service.targetport }}
       protocol: TCP
       name: http
   selector:
