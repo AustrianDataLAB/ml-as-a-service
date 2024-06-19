@@ -1,0 +1,21 @@
+version: '3'
+    
+networks:
+  test_network:
+    driver: bridge
+
+services:
+  test:
+    build:
+      context: ..
+      dockerfile: ./test/Dockerfile.test
+    image: serving-test
+    environment:
+      - PERSISTENCE_SERVICE_URI=http://persistence-service.mlaas.svc.cluster.local:5000
+      - TENANT=Auth_type <token>
+    volumes:
+      - ./test-results:/serving/test/test-results
+    networks:
+      - test_network
+    #command: ["tail", "-f", "/dev/null"]
+    command: ["python3", "-m", "pytest", "--junitxml=test-results/pytest_results.xml", "serving-test.py"]

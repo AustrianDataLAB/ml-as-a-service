@@ -1,0 +1,3 @@
+python-dotenv
+setuptools
+tensorflow == 2.16.0rc0
