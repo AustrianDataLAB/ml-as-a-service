@@ -27,7 +27,6 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "ml-as-a-service.serviceAccountName" . }}-persistence
       securityContext:
         {{- toYaml .Values.persistence.podSecurityContext | nindent 8 }}
       containers:
