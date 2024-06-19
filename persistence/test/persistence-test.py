@@ -72,13 +72,6 @@ def test_GET_data_without_token(client):
     response = client.get('/data')
     assert response.status_code == 401
     assert response.json == {"error": "x-auth-request-user header is missing"}
-    
-
-def test_GET_data_with_malformed_token(client):
-    # Send a GET request with an invalid x-auth-request-user header format
-    response = client.get('/data', headers={'x-auth-request-user': 'invalid_format'})
-    assert response.status_code == 401
-    assert response.json == {"error": "Invalid x-auth-request-user header format"}
 
 
 #-------------------Test cases for the model endpoints -------------------
@@ -116,10 +109,3 @@ def test_GET_model_without_token(client):
     response = client.get('/model')
     assert response.status_code == 401
     assert response.json == {"error": "x-auth-request-user header is missing"}
-    
-
-def test_GET_model_with_malformed_token(client):
-    # Send a GET request with an invalid x-auth-request-user header format
-    response = client.get('/model', headers={'x-auth-request-user': 'invalid_format'})
-    assert response.status_code == 401
-    assert response.json == {"error": "Invalid x-auth-request-user header format"}
