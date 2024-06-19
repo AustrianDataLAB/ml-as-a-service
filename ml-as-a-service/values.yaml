@@ -77,9 +77,10 @@ operator:
   ingress:
     enabled: true
     className: "nginx-static"
-    annotations: {}
-      # kubernetes.io/ingress.class: nginx
-      # kubernetes.io/tls-acme: "true"
+    annotations:
+      nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
+      nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/login?url=$scheme://$http_host$request_uri"
+      nginx.ingress.kubernetes.io/auth-response-headers: "x-auth-request-user, x-auth-request-email, authorization"
     hosts:
       - host: mlaas.westeurope.cloudapp.azure.com
         paths:
@@ -282,9 +283,10 @@ persistence:
   ingress:
     enabled: true
     className: "nginx-static"
-    annotations: {}
-      # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
+    annotations:
+      nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
+      nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/login?url=$scheme://$http_host$request_uri"
+      nginx.ingress.kubernetes.io/auth-response-headers: "x-auth-request-user, x-auth-request-email, authorization"
     hosts:
       - host: mlaas.westeurope.cloudapp.azure.com
         paths:
