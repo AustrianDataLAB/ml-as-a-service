@@ -29,18 +29,23 @@ for var in REQUIRED_ENV_VARS:
         sys.exit(f"Error: Environment variable {var} is not set")
 
 # Load Kubernetes configuration from default location
+logging.info("Loading Kubernetes configuration")
 config.load_incluster_config()
 
 # Create an instance of the Kubernetes BatchV1Api client
+logging.info("Creating Kubernetes API clients - batch")
 batch_v1_api = client.BatchV1Api()
 
 # Create an instance of the Kubernetes AppsV1Api client
+logging.info("Creating Kubernetes API clients - apps")
 apps_v1_api = client.AppsV1Api()
 
 # Create an instance of the Kubernetes CoreV1Api client
+logging.info("Creating Kubernetes API clients - core")
 core_v1_api = client.CoreV1Api()
 
 # Create an insteance of the Kubernetes ExtensionsV1beta1Api client
+logging.info("Creating Kubernetes API clients - networking")
 networking_v1_api = client.NetworkingV1Api()
 
 # Create a Flask app
@@ -527,4 +532,4 @@ def delete_serving_deployment():
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=80, debug=False)
+    app.run(host='0.0.0.0', port=80, debug=True)
