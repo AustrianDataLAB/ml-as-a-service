@@ -49,7 +49,9 @@ logging.info("Creating Kubernetes API clients - networking")
 networking_v1_api = client.NetworkingV1Api()
 
 # Create a Flask app
+logging.info("Creating Flask app")
 app = Flask(__name__)
+logging.info("Flask app created successfully")
 
 # Ensure that the namespace exists, if not create it
 def ensure_namespace_exists(namespace):
