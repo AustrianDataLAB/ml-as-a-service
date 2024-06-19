@@ -135,6 +135,9 @@ def enforce_auth_header():
     if request.path == '/':
         return
     
+    if request.path == '/healthcheck':
+        return
+    
     if not request.headers.get('x-auth-request-user'):
         #optionally redirect here?
         return jsonify({"error": "x-auth-request-user header is missing"}), 401
