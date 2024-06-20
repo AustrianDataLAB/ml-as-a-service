@@ -18,7 +18,7 @@ operator:
     serving:
       image: "ghcr.io/austriandatalab/ml-as-a-service:feature-ml-serving-service"
       port: 5001
-    domain: "http://mlaas.westeurope.cloudapp.azure.com"
+    domain: mlaas.westeurope.cloudapp.azure.com
     # todo PERSISTENCE_SERVICE_URI
     rbacRules:
     - apiGroups: ["batch"]
