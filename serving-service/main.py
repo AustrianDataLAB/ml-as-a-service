@@ -52,8 +52,8 @@ def setup():
 
 def load_model():
     try:
-        headers = {"Authorization": auth_header}
-        response = requests.get(persistence_service_uri, headers=headers, stream=True)
+        headers = {"x-auth-request-user": auth_header}
+        response = requests.get(persistence_service_uri+"/model", headers=headers, stream=True)
         if response.status_code == 200:
             # Use BytesIO for in-memory bytes buffer to store the zip content
             zip_file_bytes = io.BytesIO(response.content)
@@ -117,7 +117,7 @@ def _parse_and_infer(request):
 
         # Load and preprocess image
         image = tf.keras.preprocessing.image.load_img(
-            save_path, target_size=(config["img_height"], config["img_width"])
+            save_path, target_size=(config["height"], config["width"])
         )
         img_array = tf.keras.utils.img_to_array(image)
         img_array = tf.expand_dims(img_array, 0)  # Create a batch
