@@ -52,7 +52,7 @@ def setup():
 
 def load_model():
     try:
-        headers = {"Authorization": auth_header}
+        headers = {"x-auth-request-user": auth_header}
         response = requests.get(persistence_service_uri, headers=headers, stream=True)
         if response.status_code == 200:
             # Use BytesIO for in-memory bytes buffer to store the zip content
