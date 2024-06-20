@@ -151,6 +151,7 @@ def create_training_job():
                         client.V1Container(
                             name="training-" + auth_header_hash,
                             image=os.getenv("TRAINING_IMAGE"),
+                            image_pull_policy="Always",
                             env=[
                                 client.V1EnvVar(
                                     name="PERSISTENCE_SERVICE_URI",
@@ -353,6 +354,7 @@ def create_serving_deployment():
                         client.V1Container(
                             name="serving-" + auth_header_hash,
                             image=os.getenv("SERVING_IMAGE"),
+                            image_pull_policy="Always",
                             ports=[
                                 client.V1ContainerPort(
                                     container_port=int(os.getenv("SERVING_PORT"))
