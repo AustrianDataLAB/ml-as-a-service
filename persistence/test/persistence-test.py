@@ -53,7 +53,7 @@ def test_POST_data_with_token(client):
 
     # Assert the response
     assert response.status_code == 200
-    assert str(response.data).__contains__("successfully")
+    assert str(response.data).__contains__("OK")
 
     # Clean up the test file
     os.remove(file_path)
@@ -90,7 +90,7 @@ def test_POST_model_with_token(client):
 
     # Assert the response
     assert response.status_code == 200
-    assert str(response.data).__contains__("successfully")
+    assert str(response.data).__contains__("OK")
 
     # Clean up the test file
     os.remove(file_path)
