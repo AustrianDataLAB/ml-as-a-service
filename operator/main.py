@@ -4,8 +4,8 @@ from kubernetes.client.exceptions import ApiException
 import os
 import sys
 import logging
-import uuid
 import hashlib
+import uuid
 
 # Define the required environment variables
 REQUIRED_ENV_VARS = [
@@ -83,7 +83,7 @@ def create_training_job():
     # Fetch authorization-header
     auth_header = request.headers.get("x-auth-request-user")
     auth_header_hash = _sha1(auth_header)
-    random_uuid = str(uuid.uuid4())
+    random_uuid = str(uuid.uuid4())[:10]
 
     # Check if the Job already exists and is in a running state
     try:
