@@ -66,6 +66,11 @@ spec:
                 configMapKeyRef:
                   name: {{ include "ml-as-a-service.fullname" . }}-operator
                   key: PERSISTENCE_SERVICE_URI
+            - name: TLS_SECRET
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "ml-as-a-service.fullname" . }}-operator
+                  key: TLS_SECRET
           livenessProbe:
             {{- toYaml .Values.operator.livenessProbe | nindent 12 }}
           readinessProbe:
