@@ -504,7 +504,7 @@ def create_serving_deployment():
                 "tenant": auth_header,
                 "tenant-hash": auth_header_hash,
             },
-            "annotations": {"nginx.ingress.kubernetes.io/rewrite-target": "/"},
+            "annotations": {"nginx.ingress.kubernetes.io/rewrite-target": "/infer"},
         },
         "spec": {
             "ingressClassName": "nginx-static",
