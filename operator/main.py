@@ -14,6 +14,7 @@ REQUIRED_ENV_VARS = [
     "SERVING_PORT",
     "PERSISTENCE_SERVICE_URI",
     "DOMAIN",
+    "TLS_SECRET",
 ]
 
 # Set up logging
@@ -54,6 +55,7 @@ logging.info("Creating Flask app")
 app = Flask(__name__)
 logging.info("Flask app created successfully")
 
+
 # Ensure that the namespace exists, if not create it
 def ensure_namespace_exists(namespace):
     try:
@@ -66,16 +68,19 @@ def ensure_namespace_exists(namespace):
         else:
             raise
 
+
 def _sha1(input_string):
     if isinstance(input_string, str):
-        input_string = input_string.encode('utf-8')
+        input_string = input_string.encode("utf-8")
     sha256_hash = hashlib.sha1(input_string).hexdigest()
     return sha256_hash
 
-@app.route('/', methods=["GET"])
+
+@app.route("/", methods=["GET"])
 def alive():
     # Implement check logic here
     return jsonify(success=True), 200
+
 
 # Define a route to create a training job
 @app.route("/training", methods=["POST"])
@@ -100,7 +105,9 @@ def create_training_job():
         ]
 
         for job_name in filtered_jobs:
-            job = batch_v1_api.read_namespaced_job(name=job_name, namespace=auth_header_hash)
+            job = batch_v1_api.read_namespaced_job(
+                name=job_name, namespace=auth_header_hash
+            )
             if job.status.active:
                 logging.info(
                     f"Training job already exists and is in a running state for {auth_header_hash}"
@@ -126,7 +133,12 @@ def create_training_job():
         kind="ConfigMap",
         metadata=client.V1ObjectMeta(
             name="training-" + auth_header_hash + "-" + random_uuid,
-            labels={"app": "training", "tenant": auth_header, "tenant-hash": auth_header_hash, "id": random_uuid},
+            labels={
+                "app": "training",
+                "tenant": auth_header,
+                "tenant-hash": auth_header_hash,
+                "id": random_uuid,
+            },
         ),
         data={
             "PERSISTENCE_SERVICE_URI": os.getenv("PERSISTENCE_SERVICE_URI"),
@@ -141,7 +153,12 @@ def create_training_job():
         kind="Job",
         metadata=client.V1ObjectMeta(
             name="training-" + auth_header_hash + "-" + random_uuid,
-            labels={"app": "training", "tenant": auth_header,"tenant-hash": auth_header_hash, "id": random_uuid},
+            labels={
+                "app": "training",
+                "tenant": auth_header,
+                "tenant-hash": auth_header_hash,
+                "id": random_uuid,
+            },
         ),
         spec=client.V1JobSpec(
             template=client.V1PodTemplateSpec(
@@ -203,7 +220,9 @@ def create_training_job():
         # Create the Job in the cluster
         batch_v1_api.create_namespaced_job(namespace=auth_header_hash, body=job)
         # Create the ConfigMap in the cluster
-        core_v1_api.create_namespaced_config_map(namespace=auth_header_hash, body=config_map)
+        core_v1_api.create_namespaced_config_map(
+            namespace=auth_header_hash, body=config_map
+        )
         logging.info(f"Training job created successfully for {auth_header_hash}")
         return jsonify({"id": random_uuid}), 202
     except Exception as e:
@@ -324,7 +343,11 @@ def create_serving_deployment():
         kind="ConfigMap",
         metadata=client.V1ObjectMeta(
             name="serving-" + auth_header_hash,
-            labels={"app": "serving", "tenant": auth_header, "tenant-hash": auth_header_hash},
+            labels={
+                "app": "serving",
+                "tenant": auth_header,
+                "tenant-hash": auth_header_hash,
+            },
         ),
         data={
             "PERSISTENCE_SERVICE_URI": os.getenv("PERSISTENCE_SERVICE_URI"),
@@ -338,16 +361,28 @@ def create_serving_deployment():
         kind="Deployment",
         metadata=client.V1ObjectMeta(
             name="serving-" + auth_header_hash,
-            labels={"app": "serving", "tenant": auth_header, "tenant-hash": auth_header_hash},
+            labels={
+                "app": "serving",
+                "tenant": auth_header,
+                "tenant-hash": auth_header_hash,
+            },
         ),
         spec=client.V1DeploymentSpec(
             replicas=1,
             selector=client.V1LabelSelector(
-                match_labels={"app": "serving", "tenant": auth_header, "tenant-hash": auth_header_hash}
+                match_labels={
+                    "app": "serving",
+                    "tenant": auth_header,
+                    "tenant-hash": auth_header_hash,
+                }
             ),
             template=client.V1PodTemplateSpec(
                 metadata=client.V1ObjectMeta(
-                    labels={"app": "serving", "tenant": auth_header, "tenant-hash": auth_header_hash}
+                    labels={
+                        "app": "serving",
+                        "tenant": auth_header,
+                        "tenant-hash": auth_header_hash,
+                    }
                 ),
                 spec=client.V1PodSpec(
                     containers=[
@@ -374,7 +409,8 @@ def create_serving_deployment():
                                     name="TENANT",
                                     value_from=client.V1EnvVarSource(
                                         config_map_key_ref=client.V1ConfigMapKeySelector(
-                                            name="serving-" + auth_header_hash, key="TENANT"
+                                            name="serving-" + auth_header_hash,
+                                            key="TENANT",
                                         )
                                     ),
                                 ),
@@ -392,12 +428,20 @@ def create_serving_deployment():
         kind="Service",
         metadata=client.V1ObjectMeta(
             name="serving-" + auth_header_hash,
-            labels={"app": "serving", "tenant": auth_header, "tenant-hash": auth_header_hash},
+            labels={
+                "app": "serving",
+                "tenant": auth_header,
+                "tenant-hash": auth_header_hash,
+            },
         ),
         spec=client.V1ServiceSpec(
-            selector={"app": "serving", "tenant": auth_header, "tenant-hash": auth_header_hash},
+            selector={
+                "app": "serving",
+                "tenant": auth_header,
+                "tenant-hash": auth_header_hash,
+            },
             ports=[client.V1ServicePort(port=int(os.getenv("SERVING_PORT")))],
-            type="NodePort",
+            type="ClusterIP",
         ),
     )
 
@@ -407,10 +451,15 @@ def create_serving_deployment():
         kind="Ingress",
         metadata=client.V1ObjectMeta(
             name="serving-" + auth_header_hash,
-            labels={"app": "serving", "tenant": auth_header, "tenant-hash": auth_header_hash},
-            annotations={"nginx.ingress.kubernetes.io/rewrite-target: /"}
+            labels={
+                "app": "serving",
+                "tenant": auth_header,
+                "tenant-hash": auth_header_hash,
+            },
+            annotations={"nginx.ingress.kubernetes.io/rewrite-target": "/"},
         ),
         spec=client.V1IngressSpec(
+            ingress_class_name="nginx-static",
             rules=[
                 client.V1IngressRule(
                     host=os.getenv("DOMAIN"),
@@ -425,23 +474,33 @@ def create_serving_deployment():
                                         port=client.V1ServiceBackendPort(
                                             number=int(os.getenv("SERVING_PORT"))
                                         ),
-                                    )
+                                    ),
                                 ),
                             )
                         ]
                     ),
                 )
-            ]
+            ],
+            tls=[  # Add this section for TLS configuration
+                client.V1IngressTLS(
+                    hosts=[os.getenv("DOMAIN")],
+                    secretName=[os.getenv('TLS_SECRET')], 
+                )
+            ],
         ),
     )
 
     try:
         # Create the ConfigMap in the cluster
-        core_v1_api.create_namespaced_config_map(namespace=auth_header_hash, body=config_map)
+        core_v1_api.create_namespaced_config_map(
+            namespace=auth_header_hash, body=config_map
+        )
         logging.info(f"Serving ConfigMap created successfully for {auth_header_hash}")
 
         # Create the Deployment in the cluster
-        apps_v1_api.create_namespaced_deployment(namespace=auth_header_hash, body=deployment)
+        apps_v1_api.create_namespaced_deployment(
+            namespace=auth_header_hash, body=deployment
+        )
         logging.info(f"Serving deployment created successfully for {auth_header_hash}")
 
         # Create the Service in the cluster
@@ -449,12 +508,20 @@ def create_serving_deployment():
         logging.info(f"Serving service created successfully for {auth_header_hash}")
 
         # Create the Ingress in the cluster
-        networking_v1_api.create_namespaced_ingress(namespace=auth_header_hash, body=ingress)
+        networking_v1_api.create_namespaced_ingress(
+            namespace=auth_header_hash, body=ingress
+        )
         logging.info(f"Serving ingress created successfully for {auth_header_hash}")
 
         return (
             jsonify(
-                {"url": "https://" + os.getenv("DOMAIN") + "/serving/" + auth_header_hash, "id": auth_header_hash}
+                {
+                    "url": "https://"
+                    + os.getenv("DOMAIN")
+                    + "/serving/"
+                    + auth_header_hash,
+                    "id": auth_header_hash,
+                }
             ),
             201,
         )
@@ -491,8 +558,15 @@ def get_serving_deployment():
         )
         return (
             jsonify(
-                {"available": True if deployment.status.available_replicas else False,
-                 "url": "https://" + os.getenv("DOMAIN") + "/serving/" + auth_header_hash}
+                {
+                    "available": (
+                        True if deployment.status.available_replicas else False
+                    ),
+                    "url": "https://"
+                    + os.getenv("DOMAIN")
+                    + "/serving/"
+                    + auth_header_hash,
+                }
             ),
             200,
         )
@@ -535,7 +609,6 @@ def delete_serving_deployment():
             name="serving-" + auth_header_hash, namespace=auth_header_hash
         )
 
-
         return jsonify(), 200
     except ApiException as e:
         logging.error(f"ApiException occurred: {str(e)}")
@@ -549,4 +622,4 @@ def delete_serving_deployment():
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=4000, debug=True)
+    app.run(host="0.0.0.0", port=4000, debug=True)
