@@ -440,55 +440,96 @@ def create_serving_deployment():
                 "tenant": auth_header,
                 "tenant-hash": auth_header_hash,
             },
-            ports=[client.V1ServicePort(port=int(os.getenv("SERVING_PORT")))],
+            ports=[
+                client.V1ServicePort(
+                    port=80, target_port=int(os.getenv("SERVING_PORT"))
+                )
+            ],
             type="ClusterIP",
         ),
     )
 
     # Define the Ingress resource
-    ingress = client.V1Ingress(
-        api_version="networking.k8s.io/v1",
-        kind="Ingress",
-        metadata=client.V1ObjectMeta(
-            name="serving-" + auth_header_hash,
-            labels={
+    # ingress = client.V1Ingress(
+    #    api_version="networking.k8s.io/v1",
+    #    kind="Ingress",
+    #    metadata=client.V1ObjectMeta(
+    #        name="serving-" + auth_header_hash,
+    #        labels={
+    #            "app": "serving",
+    #            "tenant": auth_header,
+    #            "tenant-hash": auth_header_hash,
+    #        },
+    #        annotations={"nginx.ingress.kubernetes.io/rewrite-target": "/"},
+    #    ),
+    #    spec=client.V1IngressSpec(
+    #        ingress_class_name="nginx-static",
+    #        rules=[
+    #            client.V1IngressRule(
+    #                host=os.getenv("DOMAIN"),
+    #                http=client.V1HTTPIngressRuleValue(
+    #                    paths=[
+    #                        client.V1HTTPIngressPath(
+    #                            path="/serving/" + auth_header_hash,
+    #                            path_type="Prefix",
+    #                            backend=client.V1IngressBackend(
+    #                                service=client.V1IngressServiceBackend(
+    #                                    name="serving-" + auth_header_hash,
+    #                                    port=client.V1ServiceBackendPort(
+    #                                        number=80,
+    #                                    ),
+    #                                ),
+    #                            ),
+    #                        )
+    #                    ]
+    #                ),
+    #            )
+    #        ],
+    #        tls=[
+    #            client.V1IngressTLS(
+    #                hosts=[os.getenv("DOMAIN")],
+    #                secretName=os.getenv("TLS_SECRET"),
+    #            )
+    #        ],
+    #    ),
+    # )
+
+    ingress = {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "Ingress",
+        "metadata": {
+            "name": "serving-{{auth_header_hash}}",
+            "labels": {
                 "app": "serving",
-                "tenant": auth_header,
-                "tenant-hash": auth_header_hash,
+                "tenant": "{{auth_header}}",
+                "tenant-hash": "{{auth_header_hash}}",
             },
-            annotations={"nginx.ingress.kubernetes.io/rewrite-target": "/"},
-        ),
-        spec=client.V1IngressSpec(
-            ingress_class_name="nginx-static",
-            rules=[
-                client.V1IngressRule(
-                    host=os.getenv("DOMAIN"),
-                    http=client.V1HTTPIngressRuleValue(
-                        paths=[
-                            client.V1HTTPIngressPath(
-                                path="/serving/" + auth_header_hash,
-                                path_type="Prefix",
-                                backend=client.V1IngressBackend(
-                                    service=client.V1IngressServiceBackend(
-                                        name="serving-" + auth_header_hash,
-                                        port=client.V1ServiceBackendPort(
-                                            number=int(os.getenv("SERVING_PORT"))
-                                        ),
-                                    ),
-                                ),
-                            )
+            "annotations": {"nginx.ingress.kubernetes.io/rewrite-target": "/"},
+        },
+        "spec": {
+            "ingressClassName": "nginx-static",
+            "rules": [
+                {
+                    "host": "{{DOMAIN}}",
+                    "http": {
+                        "paths": [
+                            {
+                                "path": "/serving/{{auth_header_hash}}",
+                                "pathType": "Prefix",
+                                "backend": {
+                                    "service": {
+                                        "name": "serving-{{auth_header_hash}}",
+                                        "port": {"number": 80},
+                                    }
+                                },
+                            }
                         ]
-                    ),
-                )
+                    },
+                }
             ],
-            tls=[  # Add this section for TLS configuration
-                client.V1IngressTLS(
-                    hosts=[os.getenv("DOMAIN")],
-                    secretName=[os.getenv('TLS_SECRET')], 
-                )
-            ],
-        ),
-    )
+            "tls": [{"hosts": ["{{DOMAIN}}"], "secretName": "{{TLS_SECRET}}"}],
+        },
+    }
 
     try:
         # Create the ConfigMap in the cluster
