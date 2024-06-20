@@ -17,7 +17,7 @@ operator:
       image: "ghcr.io/austriandatalab/ml-as-a-service:feature-ml-training-service"
     serving:
       image: "ghcr.io/austriandatalab/ml-as-a-service:feature-ml-serving-service"
-      port: 80
+      port: 5001
     domain: "http://mlaas.westeurope.cloudapp.azure.com"
     # todo PERSISTENCE_SERVICE_URI
     rbacRules:
