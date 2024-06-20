@@ -10,3 +10,4 @@ data:
   SERVING_PORT: {{ .Values.operator.config.serving.port | quote }}
   DOMAIN: {{ .Values.operator.config.domain }}
   PERSISTENCE_SERVICE_URI: http://{{ include "ml-as-a-service.fullname" . }}-persistence.{{ .Release.Namespace }}.svc.cluster.local
+  TLS_SECRET : {{ .Values.operator.config.tlsSecretName}}

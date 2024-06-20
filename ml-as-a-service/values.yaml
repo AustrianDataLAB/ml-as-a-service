@@ -12,6 +12,7 @@ kubernetesClusterDomain: cluster.local
 operator:
   enabled: true
   config:
+    tlsSecretName: "mlaas-tls-prod"
     training:
       image: "ghcr.io/austriandatalab/ml-as-a-service:feature-ml-training-service"
     serving:
