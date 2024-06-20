@@ -498,11 +498,11 @@ def create_serving_deployment():
         "apiVersion": "networking.k8s.io/v1",
         "kind": "Ingress",
         "metadata": {
-            "name": "serving-{{auth_header_hash}}",
+            "name": "serving-"+ auth_header_hash,
             "labels": {
                 "app": "serving",
-                "tenant": "{{auth_header}}",
-                "tenant-hash": "{{auth_header_hash}}",
+                "tenant": auth_header,
+                "tenant-hash": auth_header_hash,
             },
             "annotations": {"nginx.ingress.kubernetes.io/rewrite-target": "/"},
         },
@@ -510,15 +510,15 @@ def create_serving_deployment():
             "ingressClassName": "nginx-static",
             "rules": [
                 {
-                    "host": "{{DOMAIN}}",
+                    "host": os.getenv("DOMAIN"),
                     "http": {
                         "paths": [
                             {
-                                "path": "/serving/{{auth_header_hash}}",
+                                "path": "/serving/"+ auth_header_hash,
                                 "pathType": "Prefix",
                                 "backend": {
                                     "service": {
-                                        "name": "serving-{{auth_header_hash}}",
+                                        "name": "serving-"+ auth_header_hash,
                                         "port": {"number": 80},
                                     }
                                 },
@@ -527,7 +527,7 @@ def create_serving_deployment():
                     },
                 }
             ],
-            "tls": [{"hosts": ["{{DOMAIN}}"], "secretName": "{{TLS_SECRET}}"}],
+            "tls": [{"hosts": [os.getenv("DOMAIN")], "secretName": os.getenv("TLS_SECRET")}],
         },
     }
 
