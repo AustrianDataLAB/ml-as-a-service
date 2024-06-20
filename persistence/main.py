@@ -84,7 +84,7 @@ def _upload_to_blob_storage(request,endpoint):
     content_type = file.content_type
     try:
         upload_data(user,endpoint,file, content_type)
-        return 'Data uploaded successfully', 200
+        return jsonify({"status":"OK"}), 200
     except Exception as e:
         print(e, file=sys.stderr)
         return jsonify({"error": "Data upload failed"}), 500
