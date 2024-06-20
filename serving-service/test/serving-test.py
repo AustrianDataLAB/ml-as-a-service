@@ -15,7 +15,7 @@ def mocked_requests():
     with requests_mock.Mocker() as m:
         # Mock the GET request to return the zip file
         m.get(
-            "http://persistence-service.mlaas.svc.cluster.local:5000",
+            "http://persistence-service.mlaas.svc.cluster.local:5000/model",
             content=zip_file_content,
             headers={"Content-Type": "application/zip"},
             status_code=200,
