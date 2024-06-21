@@ -10,6 +10,7 @@ import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
 import {HttpClientModule} from "@angular/common/http";
 import {ToastrModule} from "ngx-toastr";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
+import { WaitingGameComponent } from './waiting-game/waiting-game.component';
 
 @NgModule({
   declarations: [
@@ -17,6 +18,7 @@ import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
     FolderUploadComponent,
     NavbarComponent,
     NavbarComponent,
+    WaitingGameComponent,
   ],
   imports: [
     BrowserModule,

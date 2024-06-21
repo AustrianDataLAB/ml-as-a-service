@@ -37,6 +37,7 @@
         </div>
         <!-- Start Training Button -->
         <p><button class="btn btn-secondary" role="button" (click)="startTraining()" [disabled]="!isUploadSuccessfull ||isTrainingRunning" >Start training &raquo;</button></p>
+        <h5 *ngIf="isTrainingRunning"> Play a game while you wait!</h5>
       </div>
 
       <div class="col-12 col-md-6">
@@ -82,5 +83,6 @@
     </div>
 
   </div> <!-- /container -->
+  <app-waiting-game *ngIf="isTrainingRunning"></app-waiting-game>
 
 </main>
