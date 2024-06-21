@@ -29,12 +29,12 @@
             <input type="file" class="custom-file-input" id="folderUpload" (change)="onFolderSelected($event)">
           </div>
           <div class="input-group-append">
-            <button class="btn btn-outline-secondary" type="button" [disabled]="!isFolderValid" (click)="onUpload()">
+            <button class="btn btn-outline-secondary" type="button" [disabled]="!isFolderValid || isLoading" (click)="onUpload()">
               Upload
             </button>
           </div>
+          <i class="fa fa-spinner fa-spin" [style.display]="isLoading ? 'inline-block' : 'none'" style="font-size:24px; margin-left: 20px;"></i>
         </div>
-
         <!-- Start Training Button -->
         <p><button class="btn btn-secondary" role="button" (click)="startTraining()" [disabled]="!isUploadSuccessfull ||isTrainingRunning" >Start training &raquo;</button></p>
       </div>
@@ -45,7 +45,7 @@
           Then, upload an image and click 'Classify'. The classification label will be displayed to the right of
           the uploaded image. If you wish to stop serving the model, simply click 'Stop Model'.</p>
         <div class="input-group mb-3">
-          <button class="btn btn-success me-3" type="button" [disabled]="!isTrainingFinished || isServingStarted" (click)="startServing()">
+          <button class="btn btn-success me-3" type="button" [disabled]="isServingStarted" (click)="startServing()">
             Serve model &raquo;
           </button>
           <button class="btn btn-danger" type="button" [disabled]="!isServingStarted" (click)="stopServing()">

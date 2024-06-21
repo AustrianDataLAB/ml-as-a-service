@@ -21,6 +21,7 @@ export class FolderUploadComponent {
   isTrainingFinished = false;
   isTrainingRunning = false;
   servingId: number = 0;
+  isLoading = false;
 
   constructor(private uploadService: DataService, private toastrService: ToastrService) {
   }
@@ -77,14 +78,17 @@ export class FolderUploadComponent {
 
   onUpload(): void {
     if (this.selectedFolder) {
+      this.isLoading = true;
       console.log('Folder uploaded:', this.selectedFolder);
       this.uploadService.uploadFile(this.selectedFolder).subscribe({
         next: (res) => {
           this.toastrService.success('Folder uploaded successfully.');
           console.log('File uploaded successfully:', res);
+          this.isLoading = false;
           this.isUploadSuccessfull = true;
         },
         error: (err) => {
+          this.isLoading = false;
           this.toastrService.error('Error uploading file. Please try again.');
           console.error('Error uploading file:', err);
         }
