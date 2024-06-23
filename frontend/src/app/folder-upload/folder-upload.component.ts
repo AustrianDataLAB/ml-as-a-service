@@ -32,7 +32,17 @@ export class FolderUploadComponent implements OnInit{
     if(this.isTrainingRunning){
       this.pollStatus(this.trainingId);
     }
-    this.isServingStarted = localStorage.getItem('isServingStarted') === 'true';
+
+    this.uploadService.getServing().subscribe({
+      next: (res) => {
+        this.servingId = res.id;
+        this.isServingStarted = true;
+      },
+      error: (err) => {
+        this.isServingStarted = false;
+      }
+    });
+
   }
 
   onFolderSelected(event: Event): void {
