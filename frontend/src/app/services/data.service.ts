@@ -39,6 +39,10 @@ export class DataService {
     return this.http.post<IdResponse>(this.serving_url, {});
   }
 
+  getServing(){
+    return this.http.get<IdResponse>(this.serving_url, {});
+  }
+
   stopServing() {
     return this.http.delete(this.serving_url);
   }

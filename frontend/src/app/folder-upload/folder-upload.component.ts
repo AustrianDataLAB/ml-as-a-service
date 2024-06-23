@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {DataService} from "../services/data.service";
 import {ToastrService} from 'ngx-toastr';
 
@@ -7,7 +7,7 @@ import {ToastrService} from 'ngx-toastr';
   templateUrl: './folder-upload.component.html',
   styleUrls: ['./folder-upload.component.css']
 })
-export class FolderUploadComponent {
+export class FolderUploadComponent implements OnInit{
 
   selectedFolder: any;
   isFolderValid = false;
@@ -18,12 +18,21 @@ export class FolderUploadComponent {
   labelVisible = false;
   classificationLabel = '';
   uploadedImage: any;
-  isTrainingFinished = false;
   isTrainingRunning = false;
   servingId: number = 0;
+  trainingId: number = 0;
   isLoading = false;
 
   constructor(private uploadService: DataService, private toastrService: ToastrService) {
+  }
+
+  ngOnInit(): void {
+    this.isTrainingRunning = localStorage.getItem('isTrainingRunning') === 'true';
+    this.trainingId = Number(localStorage.getItem('trainingId'));
+    if(this.isTrainingRunning){
+      this.pollStatus(this.trainingId);
+    }
+    this.isServingStarted = localStorage.getItem('isServingStarted') === 'true';
   }
 
   onFolderSelected(event: Event): void {
@@ -106,16 +115,16 @@ export class FolderUploadComponent {
       console.log('Start training');
       this.uploadService.startTraining().subscribe({
         next: (res) => {
-          const id = res.id;
-
-          this.isTrainingFinished = false;
+          this.trainingId = res.id;
+          localStorage.setItem('isTrainingRunning', 'true');
+          localStorage.setItem('trainingId', this.trainingId.toString());
           this.isTrainingRunning= true;
           this.isUploadSuccessfull = false;
           this.isFolderValid = false;
           console.log(this.isTrainingRunning)
           console.log(this.isFolderValid)
           this.toastrService.success('Training started successfully.');
-          this.pollStatus(id);
+          this.pollStatus(this.trainingId);
         },
         error: (err) => {
           this.printErrorMessage(err)
@@ -131,8 +140,8 @@ export class FolderUploadComponent {
       next: (res) => {
         console.log('Training status:', res);
         if (res.status === 'Succeeded') {
-          this.isTrainingFinished = true;
           this.isTrainingRunning = false;
+          localStorage.setItem('isTrainingRunning', 'false');
           this.toastrService.success('Training finished successfully.');
         } else if(res.status === 'Failed') {
           this.isTrainingRunning = false;
@@ -154,6 +163,7 @@ export class FolderUploadComponent {
       next: (res) => {
         this.toastrService.success('Serving started successfully.');
         this.servingId = res.id;
+        localStorage.setItem('isServingStarted', 'true');
         this.isServingStarted = true;
       },
       error: (err) => {
@@ -170,6 +180,7 @@ export class FolderUploadComponent {
       this.uploadService.stopServing().subscribe({
         next: (res) => {
           this.toastrService.success('Stopped serving successfully.');
+          localStorage.setItem('isServingStarted', 'false');
           this.reset()
         },
         error: (err) => {
