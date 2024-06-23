@@ -41,6 +41,8 @@ export class FolderUploadComponent {
 
       if (file.size > 1e9) { // 1e9 bytes = 1GB
         console.error('File is too large. Please upload a file under 1GB.');
+        this.toastrService.error('File is too large. Please upload a file under 1GB.');
+
         return;
       }
       this.isFolderValid = true;
@@ -54,7 +56,7 @@ export class FolderUploadComponent {
 
     if (file) {
       if (file.type !== 'image/jpeg'  && file.type !== 'image/png') {
-        console.error('Invalid file type. Please upload a jpeg file.');
+        console.error('Invalid file type. Please upload a jpeg or png file.');
         this.toastrService.error('Invalid file type. Please upload a jpeg or png file.');
         return;
       }
@@ -89,7 +91,7 @@ export class FolderUploadComponent {
         },
         error: (err) => {
           this.isLoading = false;
-          this.toastrService.error('Error uploading file. Please try again.');
+          this.printErrorMessage(err)
           console.error('Error uploading file:', err);
         }
       });
@@ -116,7 +118,7 @@ export class FolderUploadComponent {
           this.pollStatus(id);
         },
         error: (err) => {
-          this.toastrService.error('Error starting training. Please try again.');
+          this.printErrorMessage(err)
           console.error('Error uploading file:', err);
         }
       });
@@ -140,7 +142,7 @@ export class FolderUploadComponent {
         }
       },
       error: (err) => {
-        this.toastrService.error('Error getting training status. Please try again.');
+        this.printErrorMessage(err)
         console.error('Error getting training status:', err);
       }
     });
@@ -155,7 +157,7 @@ export class FolderUploadComponent {
         this.isServingStarted = true;
       },
       error: (err) => {
-        this.toastrService.error('Error starting serving. Please try again.');
+        this.printErrorMessage(err)
         console.error('Error starting serving:', err);
       }
     });
@@ -171,7 +173,7 @@ export class FolderUploadComponent {
           this.reset()
         },
         error: (err) => {
-          this.toastrService.error('Error stopping serving. Please try again.');
+          this.printErrorMessage(err)
           console.error('Error stopping serving:', err);
         }
       });
@@ -186,7 +188,7 @@ export class FolderUploadComponent {
           this.classificationLabel = res;
         },
         error: (err) => {
-          this.toastrService.error('Error uploading file. Please try again.');
+          this.printErrorMessage(err)
           console.error('Error uploading file:', err);
         }
       });
@@ -206,5 +208,18 @@ export class FolderUploadComponent {
     this.uploadedImage = null;
   }
 
+
+  printErrorMessage(error: any): void {
+    let errorMessage = undefined
+    let unknownErrorMessage = 'An error has occurred. Please try again later.'
+    if (error.error && error.error.error) {
+      errorMessage = error.error.error;
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+
+    this.toastrService.error(errorMessage ?? unknownErrorMessage);
+
+  }
 
 }
