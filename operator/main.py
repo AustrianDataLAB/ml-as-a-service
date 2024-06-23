@@ -498,7 +498,7 @@ def create_serving_deployment():
         "apiVersion": "networking.k8s.io/v1",
         "kind": "Ingress",
         "metadata": {
-            "name": "serving-"+ auth_header_hash,
+            "name": "serving-" + auth_header_hash,
             "labels": {
                 "app": "serving",
                 "tenant": auth_header,
@@ -514,11 +514,11 @@ def create_serving_deployment():
                     "http": {
                         "paths": [
                             {
-                                "path": "/serving/"+ auth_header_hash,
+                                "path": "/serving/" + auth_header_hash,
                                 "pathType": "Prefix",
                                 "backend": {
                                     "service": {
-                                        "name": "serving-"+ auth_header_hash,
+                                        "name": "serving-" + auth_header_hash,
                                         "port": {"number": 80},
                                     }
                                 },
@@ -527,7 +527,9 @@ def create_serving_deployment():
                     },
                 }
             ],
-            "tls": [{"hosts": [os.getenv("DOMAIN")], "secretName": os.getenv("TLS_SECRET")}],
+            "tls": [
+                {"hosts": [os.getenv("DOMAIN")], "secretName": os.getenv("TLS_SECRET")}
+            ],
         },
     }
 
@@ -607,6 +609,7 @@ def get_serving_deployment():
                     + os.getenv("DOMAIN")
                     + "/serving/"
                     + auth_header_hash,
+                    "id": auth_header_hash,
                 }
             ),
             200,
