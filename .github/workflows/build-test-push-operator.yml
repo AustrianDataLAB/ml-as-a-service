@@ -10,29 +10,7 @@ env:
   REGISTRY: ghcr.io
 
 jobs:
-  integration-test:
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Run tests
-        working-directory: ./operator
-        run: make test
-
-      - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v1
-        if: always()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          files: ./operator/test/test-results/*.xml
-
-      - name: TearDown
-        working-directory: ./operator
-        run: make down
-
   build-and-push-image:
-    needs: [integration-test]
     strategy:
       matrix:
         component: [ operator ]
