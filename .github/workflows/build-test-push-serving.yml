@@ -1,7 +1,7 @@
 name: Build, Test and Push Serving-Servcie to GitHub Container Registry
 on:
   push:
-    branches: [ "main", "dev", "feature/serving-service" ]
+    branches: [ "main", "dev", "feature/ml-serving-service" ]
   pull_request:
     branches: [ "main", "dev" ]
   workflow_dispatch:
