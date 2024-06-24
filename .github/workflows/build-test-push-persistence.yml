@@ -1,9 +1,9 @@
 name: Build and Push to GitHub Registry
 on:
   push:
-    branches: [ main, "feature/persistence-service" ]
+    branches: [ "main", "dev", "feature/persistence-service" ]
   pull_request:
-    branches: [ main ]
+    branches: [ "main", "dev" ]
   workflow_dispatch:
 
 env:
