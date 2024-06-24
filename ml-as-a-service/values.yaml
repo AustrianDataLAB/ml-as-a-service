@@ -14,9 +14,9 @@ operator:
   config:
     tlsSecretName: "mlaas-tls-prod"
     training:
-      image: "ghcr.io/austriandatalab/ml-as-a-service:feature-ml-training-service"
+      image: "ghcr.io/austriandatalab/ml-as-a-service/training:v1.0.0-0"
     serving:
-      image: "ghcr.io/austriandatalab/ml-as-a-service:feature-ml-serving-service"
+      image: "ghcr.io/austriandatalab/ml-as-a-service/serving:v1.0.0-0"
       port: 5001
     domain: mlaas.westeurope.cloudapp.azure.com
     # todo PERSISTENCE_SERVICE_URI
@@ -40,10 +40,10 @@ operator:
   replicaCount: 1
 
   image:
-    repository: ghcr.io/austriandatalab/ml-as-a-service
+    repository: ghcr.io/austriandatalab/ml-as-a-service/operator
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "feature-operator"
+    tag: "v1.0.0-0"
 
   serviceAccount:
     # Specifies whether a service account should be created
@@ -148,10 +148,10 @@ frontend:
   enabled: true
   replicaCount: 1
   image:
-    repository: ghcr.io/austriandatalab/ml-as-a-service
+    repository: ghcr.io/austriandatalab/ml-as-a-service/frontend
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "feature-frontend"
+    tag: "v1.0.0-0"
 
   podAnnotations: {}
   podLabels: {}
@@ -246,10 +246,10 @@ persistence:
   enabled: true
   replicaCount: 1
   image:
-    repository: ghcr.io/austriandatalab/ml-as-a-service
+    repository: ghcr.io/austriandatalab/ml-as-a-service/persistence
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "feature-persistence-service"
+    tag: "v1.0.0-0"
 
   serviceAccount:
     # Specifies whether a service account should be created
