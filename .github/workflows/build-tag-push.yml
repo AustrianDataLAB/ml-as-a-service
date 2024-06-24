@@ -43,8 +43,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Login to the Container Registry
         uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20
