@@ -1,7 +1,7 @@
 name: Test persistence-service with docker-compose
 on: 
     push:
-        branches: [ "feature/persistence-service" ]
+        #branches: [ "feature/persistence-service" ]
         # Publish semver tags as releases.
         #tags: [ 'v*.*.*' ]
     pull_request:
