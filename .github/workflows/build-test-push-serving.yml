@@ -1,4 +1,4 @@
-name: Build, Test and Push Serving Servcie to GitHub Container Registry
+name: Build, Test and Push Serving-Servcie to GitHub Container Registry
 on:
   push:
     branches: [ "main", "dev", "feature/serving-service" ]
