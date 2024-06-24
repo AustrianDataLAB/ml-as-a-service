@@ -1,4 +1,4 @@
-name: Build and Push to GitHub Registry
+name: Build, Test and Push Persistence Servcie to GitHub Registry
 on:
   push:
     branches: [ "main", "dev", "feature/persistence-service" ]
