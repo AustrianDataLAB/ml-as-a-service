@@ -1,0 +1,107 @@
+name: Build, Test and Push Serving Servcie to GitHub Container Registry
+on:
+  push:
+    branches: [ "main", "dev", "feature/serving-service" ]
+  pull_request:
+    branches: [ "main", "dev" ]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  integration-test:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Run tests
+        working-directory: ./serving-service
+        run: make test
+
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: always()
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          files: ./serving-service/test/test-results/*.xml
+
+      - name: TearDown
+        working-directory: ./serving-service
+        run: make down
+
+  build-and-push-image:
+    needs: [integration-test]
+    strategy:
+      matrix:
+        component: [ serving ]
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to the Container Registry
+        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine Semantic Version
+        uses: paulhatch/semantic-version@v5.4.0
+        id: semantic-version
+        with:
+          tag_prefix: "v"
+          major_pattern: "(MAJOR-${{ matrix.component }})"
+          minor_pattern: "(MINOR-${{ matrix.component }})"
+          change_path: "${{ matrix.component }}-service"
+          version_format: "v${major}.${minor}.${patch}+${increment}"
+          namespace: ${{ matrix.component }}
+
+      - name: Build Docker Image
+        id: docker-build
+        uses: docker/build-push-action@v5.3.0
+        with:
+          context: ./${{ matrix.component }}-service
+          load: true
+          file: ./${{ matrix.component }}-service/Dockerfile
+
+      - name: Run Trivy Vulnerability Scanner
+        id: scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.docker-build.outputs.imageid }}
+          format: 'table'
+          severity: HIGH,CRITICAL
+          exit-code: 1
+
+      - name: Upload SARIF file
+        if: ${{ steps.scan.outputs.sarif != '' }}
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Extract Metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5.5.1
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.component }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=ref,event=pr
+            type=sha
+            type=raw,value=${{ steps.semantic-version.outputs.version }}
+
+      - name: Push Docker Image
+        id: docker-push
+        uses: docker/build-push-action@v5.3.0
+        with:
+          context: ./${{ matrix.component }}-service
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
