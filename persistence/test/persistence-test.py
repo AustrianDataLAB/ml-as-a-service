@@ -49,11 +49,11 @@ def test_POST_data_with_token(client):
 
     # Send a POST request with the file
     with open(file_path, 'rb') as f:
-        response = client.post('/data', headers={'Authorization': AUTH_TOKEN}, data={'file': (f, 'test_file.txt')})
+        response = client.post('/data', headers={'x-auth-request-user': AUTH_TOKEN}, data={'file': (f, 'test_file.txt')})
 
     # Assert the response
     assert response.status_code == 200
-    assert str(response.data).__contains__("successfully")
+    assert str(response.data).__contains__("OK")
 
     # Clean up the test file
     os.remove(file_path)
@@ -61,24 +61,17 @@ def test_POST_data_with_token(client):
 
 def test_GET_data_with_valid_token(client):
     # Send a GET request with a valid token
-    response = client.get('/data', headers={'Authorization': AUTH_TOKEN})
+    response = client.get('/data', headers={'x-auth-request-user': AUTH_TOKEN})
     print(response.text)
     assert response.status_code == 200
     assert response.text == TEST_FILE_CONTENT
 
 
 def test_GET_data_without_token(client):
-    # Send a GET request without the Authorization header
+    # Send a GET request without the x-auth-request-user header
     response = client.get('/data')
     assert response.status_code == 401
-    assert response.json == {"error": "Authorization header is missing"}
-    
-
-def test_GET_data_with_malformed_token(client):
-    # Send a GET request with an invalid Authorization header format
-    response = client.get('/data', headers={'Authorization': 'invalid_format'})
-    assert response.status_code == 401
-    assert response.json == {"error": "Invalid Authorization header format"}
+    assert response.json == {"error": "x-auth-request-user header is missing"}
 
 
 #-------------------Test cases for the model endpoints -------------------
@@ -93,11 +86,11 @@ def test_POST_model_with_token(client):
 
     # Send a POST request with the file
     with open(file_path, 'rb') as f:
-        response = client.post('/model', headers={'Authorization': AUTH_TOKEN}, data={'file': (f, 'test_file.txt')})
+        response = client.post('/model', headers={'x-auth-request-user': AUTH_TOKEN}, data={'file': (f, 'test_file.txt')})
 
     # Assert the response
     assert response.status_code == 200
-    assert str(response.data).__contains__("successfully")
+    assert str(response.data).__contains__("OK")
 
     # Clean up the test file
     os.remove(file_path)
@@ -105,21 +98,14 @@ def test_POST_model_with_token(client):
 
 def test_GET_model_with_valid_token(client):
     # Send a GET request with a valid token
-    response = client.get('/model', headers={'Authorization': AUTH_TOKEN})
+    response = client.get('/model', headers={'x-auth-request-user': AUTH_TOKEN})
     print(response.text)
     assert response.status_code == 200
     assert response.text == TEST_FILE_CONTENT
 
 
 def test_GET_model_without_token(client):
-    # Send a GET request without the Authorization header
+    # Send a GET request without the x-auth-request-user header
     response = client.get('/model')
     assert response.status_code == 401
-    assert response.json == {"error": "Authorization header is missing"}
-    
-
-def test_GET_model_with_malformed_token(client):
-    # Send a GET request with an invalid Authorization header format
-    response = client.get('/model', headers={'Authorization': 'invalid_format'})
-    assert response.status_code == 401
-    assert response.json == {"error": "Invalid Authorization header format"}
+    assert response.json == {"error": "x-auth-request-user header is missing"}

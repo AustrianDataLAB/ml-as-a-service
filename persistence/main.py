@@ -60,9 +60,7 @@ def _sha1(input_string):
     return sha256_hash
 
 def _get_user_sha(request):
-    #TODO: just a dummy- fix when auth is implemented
-    token = request.headers.get('Authorization')
-    user_id = token.split("-")[0]
+    user_id = request.headers.get('x-auth-request-user')
     return _sha1(user_id)
 
 
@@ -86,17 +84,15 @@ def _upload_to_blob_storage(request,endpoint):
     content_type = file.content_type
     try:
         upload_data(user,endpoint,file, content_type)
-        return 'Data uploaded successfully', 200
+        return jsonify({"status":"OK"}), 200
     except Exception as e:
         print(e, file=sys.stderr)
-        #TODO: differnt code here?
         return jsonify({"error": "Data upload failed"}), 500
    
 def _download_from_blob_storage(request,endpoint):
     try:
         user = _get_user_sha(request)
         blob_data, content_type = download_blob(user, endpoint)
-        #TODO: maybe dynamic filename?
         return send_file(blob_data,download_name="data", as_attachment=True, mimetype=content_type)
     except Exception as e:
         print(e, file=sys.stderr)
@@ -130,23 +126,21 @@ def hello_world():
 
 @app.route('/healthcheck')
 def healthcheck():
-    return 200, 'OK'
+    return jsonify({"status":"OK"}), 200
 
 @app.before_request
 def enforce_auth_header():
-    #print('AUTH-HEADER:'+str(request.headers.get('Authorization')), file=sys.stderr)
+    #print('AUTH-HEADER:'+str(request.headers.get('x-auth-request-user')), file=sys.stderr)
     #omit for hello world - this might be interesting for heatbeat
     if request.path == '/':
         return
     
-    if not request.headers.get('Authorization'):
-        #optionally redirect here?
-        return jsonify({"error": "Authorization header is missing"}), 401
+    if request.path == '/healthcheck':
+        return
     
-    # validate format
-    # TODO: might wann do this with regex once the format is clear
-    if not "-" in request.headers.get('Authorization') :
-        return jsonify({"error": "Invalid Authorization header format"}), 401
+    if not request.headers.get('x-auth-request-user'):
+        #optionally redirect here?
+        return jsonify({"error": "x-auth-request-user header is missing"}), 401
 
 
 def create_app(config):
