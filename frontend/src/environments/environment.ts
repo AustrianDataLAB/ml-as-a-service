@@ -1,4 +1,4 @@
 export const environment =
   {
-    API_URL: 'http://localhost:8000/api'
+    API_URL: 'https://mlaas.westeurope.cloudapp.azure.com'
   };

@@ -20,8 +20,9 @@
     <div class="row">
       <div class="col-12 col-md-6">
         <h2>Train your model</h2>
-        <p>Simply upload your images as a compressed folder. Once done, click "Start Training" to begin the training
-          process. Wait until a pop-up message appears, indicating that the training process is finished, so that you can start serving your model.</p>
+        <p>Simply upload your images as a compressed zip folder, with the images organized into subfolders by class. The subfolder names will be used later for classification results, so choose them wisely! <br>
+          Once done, click "Start Training" to begin the process. Wait for a pop-up message indicating that the training is finished, and then you can start serving your model.
+        </p>
 
         <!-- File Upload Button -->
         <div class="input-group mb-3">
@@ -29,14 +30,15 @@
             <input type="file" class="custom-file-input" id="folderUpload" (change)="onFolderSelected($event)">
           </div>
           <div class="input-group-append">
-            <button class="btn btn-outline-secondary" type="button" [disabled]="!isFolderValid" (click)="onUpload()">
+            <button class="btn btn-outline-secondary" type="button" [disabled]="!isFolderValid || isLoading" (click)="onUpload()">
               Upload
             </button>
           </div>
+          <i class="fa fa-spinner fa-spin" [style.display]="isLoading ? 'inline-block' : 'none'" style="font-size:24px; margin-left: 20px;"></i>
         </div>
-
         <!-- Start Training Button -->
         <p><button class="btn btn-secondary" role="button" (click)="startTraining()" [disabled]="!isUploadSuccessfull ||isTrainingRunning" >Start training &raquo;</button></p>
+        <h5 *ngIf="isTrainingRunning"> Play a game while you wait!</h5>
       </div>
 
       <div class="col-12 col-md-6">
@@ -45,7 +47,7 @@
           Then, upload an image and click 'Classify'. The classification label will be displayed to the right of
           the uploaded image. If you wish to stop serving the model, simply click 'Stop Model'.</p>
         <div class="input-group mb-3">
-          <button class="btn btn-success me-3" type="button" [disabled]="!isTrainingFinished || isServingStarted" (click)="startServing()">
+          <button class="btn btn-success me-3" type="button" [disabled]="isServingStarted" (click)="startServing()">
             Serve model &raquo;
           </button>
           <button class="btn btn-danger" type="button" [disabled]="!isServingStarted" (click)="stopServing()">
@@ -82,5 +84,6 @@
     </div>
 
   </div> <!-- /container -->
+  <app-waiting-game *ngIf="isTrainingRunning"></app-waiting-game>
 
 </main>

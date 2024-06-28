@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {DataService} from "../services/data.service";
 import {ToastrService} from 'ngx-toastr';
 
@@ -7,7 +7,7 @@ import {ToastrService} from 'ngx-toastr';
   templateUrl: './folder-upload.component.html',
   styleUrls: ['./folder-upload.component.css']
 })
-export class FolderUploadComponent {
+export class FolderUploadComponent implements OnInit{
 
   selectedFolder: any;
   isFolderValid = false;
@@ -18,11 +18,31 @@ export class FolderUploadComponent {
   labelVisible = false;
   classificationLabel = '';
   uploadedImage: any;
-  isTrainingFinished = false;
   isTrainingRunning = false;
   servingId: number = 0;
+  trainingId: number = 0;
+  isLoading = false;
 
   constructor(private uploadService: DataService, private toastrService: ToastrService) {
+  }
+
+  ngOnInit(): void {
+    this.isTrainingRunning = localStorage.getItem('isTrainingRunning') === 'true';
+    this.trainingId = Number(localStorage.getItem('trainingId'));
+    if(this.isTrainingRunning){
+      this.pollStatus(this.trainingId);
+    }
+
+    this.uploadService.getServing().subscribe({
+      next: (res) => {
+        this.servingId = res.id;
+        this.isServingStarted = true;
+      },
+      error: (err) => {
+        this.isServingStarted = false;
+      }
+    });
+
   }
 
   onFolderSelected(event: Event): void {
@@ -31,7 +51,8 @@ export class FolderUploadComponent {
     const file: File = (target.files as FileList)[0];
 
     if (file) {
-      if (file.type !== 'application/zip') {
+      console.log("file type:" + file.type)
+      if (file.type !== 'application/zip' && file.type !== 'application/x-zip-compressed') {
         console.error('Invalid file type. Please upload a zip file.');
         this.toastrService.error('Invalid file type. Please upload a zip file.');
         return;
@@ -39,6 +60,8 @@ export class FolderUploadComponent {
 
       if (file.size > 1e9) { // 1e9 bytes = 1GB
         console.error('File is too large. Please upload a file under 1GB.');
+        this.toastrService.error('File is too large. Please upload a file under 1GB.');
+
         return;
       }
       this.isFolderValid = true;
@@ -52,7 +75,7 @@ export class FolderUploadComponent {
 
     if (file) {
       if (file.type !== 'image/jpeg'  && file.type !== 'image/png') {
-        console.error('Invalid file type. Please upload a jpeg file.');
+        console.error('Invalid file type. Please upload a jpeg or png file.');
         this.toastrService.error('Invalid file type. Please upload a jpeg or png file.');
         return;
       }
@@ -76,15 +99,18 @@ export class FolderUploadComponent {
 
   onUpload(): void {
     if (this.selectedFolder) {
+      this.isLoading = true;
       console.log('Folder uploaded:', this.selectedFolder);
       this.uploadService.uploadFile(this.selectedFolder).subscribe({
         next: (res) => {
           this.toastrService.success('Folder uploaded successfully.');
           console.log('File uploaded successfully:', res);
+          this.isLoading = false;
           this.isUploadSuccessfull = true;
         },
         error: (err) => {
-          this.toastrService.error('Error uploading file. Please try again.');
+          this.isLoading = false;
+          this.printErrorMessage(err)
           console.error('Error uploading file:', err);
         }
       });
@@ -99,19 +125,19 @@ export class FolderUploadComponent {
       console.log('Start training');
       this.uploadService.startTraining().subscribe({
         next: (res) => {
-          const id = res.id;
-
-          this.isTrainingFinished = false;
+          this.trainingId = res.id;
+          localStorage.setItem('isTrainingRunning', 'true');
+          localStorage.setItem('trainingId', this.trainingId.toString());
           this.isTrainingRunning= true;
           this.isUploadSuccessfull = false;
           this.isFolderValid = false;
           console.log(this.isTrainingRunning)
           console.log(this.isFolderValid)
           this.toastrService.success('Training started successfully.');
-          this.pollStatus(id);
+          this.pollStatus(this.trainingId);
         },
         error: (err) => {
-          this.toastrService.error('Error starting training. Please try again.');
+          this.printErrorMessage(err)
           console.error('Error uploading file:', err);
         }
       });
@@ -124,8 +150,8 @@ export class FolderUploadComponent {
       next: (res) => {
         console.log('Training status:', res);
         if (res.status === 'Succeeded') {
-          this.isTrainingFinished = true;
           this.isTrainingRunning = false;
+          localStorage.setItem('isTrainingRunning', 'false');
           this.toastrService.success('Training finished successfully.');
         } else if(res.status === 'Failed') {
           this.isTrainingRunning = false;
@@ -135,7 +161,7 @@ export class FolderUploadComponent {
         }
       },
       error: (err) => {
-        this.toastrService.error('Error getting training status. Please try again.');
+        this.printErrorMessage(err)
         console.error('Error getting training status:', err);
       }
     });
@@ -147,10 +173,11 @@ export class FolderUploadComponent {
       next: (res) => {
         this.toastrService.success('Serving started successfully.');
         this.servingId = res.id;
+        localStorage.setItem('isServingStarted', 'true');
         this.isServingStarted = true;
       },
       error: (err) => {
-        this.toastrService.error('Error starting serving. Please try again.');
+        this.printErrorMessage(err)
         console.error('Error starting serving:', err);
       }
     });
@@ -163,10 +190,11 @@ export class FolderUploadComponent {
       this.uploadService.stopServing().subscribe({
         next: (res) => {
           this.toastrService.success('Stopped serving successfully.');
+          localStorage.setItem('isServingStarted', 'false');
           this.reset()
         },
         error: (err) => {
-          this.toastrService.error('Error stopping serving. Please try again.');
+          this.printErrorMessage(err)
           console.error('Error stopping serving:', err);
         }
       });
@@ -181,7 +209,7 @@ export class FolderUploadComponent {
           this.classificationLabel = res;
         },
         error: (err) => {
-          this.toastrService.error('Error uploading file. Please try again.');
+          this.printErrorMessage(err)
           console.error('Error uploading file:', err);
         }
       });
@@ -201,5 +229,18 @@ export class FolderUploadComponent {
     this.uploadedImage = null;
   }
 
+
+  printErrorMessage(error: any): void {
+    let errorMessage = undefined
+    let unknownErrorMessage = 'An error has occurred. Please try again later.'
+    if (error.error && error.error.error) {
+      errorMessage = error.error.error;
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+
+    this.toastrService.error(errorMessage ?? unknownErrorMessage);
+
+  }
 
 }

@@ -1,0 +1,7 @@
+<div>
+  <div class="game">
+    <div id="dino" #dino></div>
+    <div id="cactus" #cactus></div>
+  </div>
+  <button class="restart-button" *ngIf="!isAlive" (click)="resetGame()">Restart Game</button>
+</div>
