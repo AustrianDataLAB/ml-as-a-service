@@ -1,0 +1,9 @@
+Flask
+python-dotenv
+tensorflow
+numpy
+keras
+pyyaml 
+h5py
+werkzeug
+Pillow

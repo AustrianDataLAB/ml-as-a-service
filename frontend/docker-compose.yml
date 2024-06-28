@@ -1,0 +1,8 @@
+services:
+  angular_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mlaas-service-frontend:latest
+    ports:
+      - "8080:80"

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ml-as-a-service.fullname" . }}-operator
+  labels:
+    {{- include "ml-as-a-service.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.operator.service.type }}
+  ports:
+    - port: {{ .Values.operator.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "ml-as-a-service.selectorLabelsOperator" . | nindent 4 }}

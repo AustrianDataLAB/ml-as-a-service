@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ml-as-a-service.fullname" . }}-persistence
+  labels:
+    {{- include "ml-as-a-service.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.persistence.autoscaling.enabled }}
+  replicas: {{ .Values.persistence.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "ml-as-a-service.selectorLabelsPersistence" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.persistence.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "ml-as-a-service.selectorLabelsPersistence" . | nindent 8 }}
+        {{- with .Values.persistence.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.persistence.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "ml-as-a-service.serviceAccountName" . }}-persistence
+      securityContext:
+        {{- toYaml .Values.persistence.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.persistence.securityContext | nindent 12 }}
+          image: "{{ .Values.persistence.image.repository }}:{{ .Values.persistence.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.persistence.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.persistence.service.port }}
+              protocol: TCP
+          env:
+            - name: TRAINING_IMAGE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "ml-as-a-service.fullname" . }}-persistence
+                  key: TRAINING_IMAGE
+            - name: SERVING_IMAGE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "ml-as-a-service.fullname" . }}-persistence
+                  key: SERVING_IMAGE
+            - name: SERVING_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "ml-as-a-service.fullname" . }}-persistence
+                  key: SERVING_PORT
+            - name: DOMAIN
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "ml-as-a-service.fullname" . }}-persistence
+                  key: DOMAIN
+            - name: PERSISTENCE_SERVICE_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "ml-as-a-service.fullname" . }}-persistence
+                  key: PERSISTENCE_SERVICE_URI
+          livenessProbe:
+            {{- toYaml .Values.persistence.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.persistence.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.persistence.resources | nindent 12 }}
+          {{- with .Values.persistence.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.persistence.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.persistence.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.persistence.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.persistence.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

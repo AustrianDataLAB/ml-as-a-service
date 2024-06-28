@@ -1,0 +1,20 @@
+/* Set custom primary color */
+:root {
+  --primary-color: #384450; /* Replace with your desired primary color */
+}
+
+/* Override Bootstrap navbar primary color */
+.navbar {
+  background-color: var(--primary-color);
+}
+
+/* Change navbar text and link color */
+.navbar .navbar-brand,
+.navbar .navbar-nav .nav-link {
+  color: white; /* Change text color to white */
+}
+
+/* Change active link color */
+.navbar .navbar-nav .nav-item.active .nav-link {
+  color: white; /* Change active link text color to white */
+}

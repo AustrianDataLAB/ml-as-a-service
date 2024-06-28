@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "serving.fullname" . }}-serving-service
+  labels:
+  {{- include "serving.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.servingService.replicas }}
+  selector:
+    matchLabels:
+      app: serving-service
+    {{- include "serving.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app: serving-service
+      {{- include "serving.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - env:
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ quote .Values.kubernetesClusterDomain }}
+        image: {{ .Values.servingService.servingService.image.repository }}:{{ .Values.servingService.servingService.image.tag
+          | default .Chart.AppVersion }}
+        imagePullPolicy: {{ .Values.servingService.servingService.imagePullPolicy }}
+        name: serving-service
+        ports:
+        - containerPort: 5001
+        resources: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "serving.fullname" . }}-serving-service
+  labels:
+  {{- include "serving.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.servingService.type }}
+  selector:
+    app: serving-service
+  {{- include "serving.selectorLabels" . | nindent 4 }}
+  ports:
+	{{- .Values.servingService.ports | toYaml | nindent 2 }}

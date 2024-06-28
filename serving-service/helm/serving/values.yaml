@@ -1,0 +1,14 @@
+kubernetesClusterDomain: cluster.local
+servingService:
+  ports:
+  - name: api
+    port: 5001
+    protocol: TCP
+    targetPort: 5001
+  replicas: 1
+  servingService:
+    image:
+      repository: ghcr.io/austriandatalab/ml-as-a-service
+      tag: feature-serving-service
+    imagePullPolicy: IfNotPresent
+  type: ClusterIP

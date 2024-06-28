@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ml-as-a-service.fullname" . }}-persistence
+  labels:
+    {{- include "ml-as-a-service.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.persistence.service.type }}
+  ports:
+    - port: {{ .Values.persistence.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "ml-as-a-service.selectorLabelsOperator" . | nindent 4 }}

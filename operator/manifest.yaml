@@ -1,0 +1,122 @@
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/service-account-token
+metadata:
+  name: token-secret
+  namespace: mlaas
+  annotations:
+    kubernetes.io/service-account.name: operator-service-account
+---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: operator-service-account
+  namespace: mlaas
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: operator-role
+rules:
+- apiGroups: ["batch"]
+  resources: ["jobs"]
+  verbs: ["create", "get", "list", "delete"]  # Include other verbs as needed
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["create", "get", "list", "delete"]  # Include other verbs as needed
+- apiGroups: [""]
+  resources: ["namespaces"]
+  verbs: ["create", "get"]  # Include other verbs as needed
+- apiGroups: [""]
+  resources: ["configmaps", "services"]
+  verbs: ["create", "get", "list", "delete"]  # Include other verbs as needed
+- apiGroups: ["networking.k8s.io"]
+  resources: ["ingresses"]
+  verbs: ["create", "get", "list", "delete"]  # Include other verbs as needed
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: operator-role-binding
+subjects:
+- kind: ServiceAccount
+  name: operator-service-account
+  namespace: mlaas
+roleRef:
+  kind: ClusterRole
+  name: operator-role
+  apiGroup: rbac.authorization.k8s.io
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: operator-deployment
+  namespace: mlaas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: operator
+  template:
+    metadata:
+      labels:
+        app: operator
+    spec:
+      serviceAccountName: operator-service-account  # Assign the ServiceAccount to the Pod
+      containers:
+        - name: operator
+          image: operator
+          imagePullPolicy: IfNotPresent   # Specify the image pull policy here
+          ports:
+            - containerPort: 5000
+          env:
+            - name: NAMESPACE
+              value: mlaas
+            - name: TRAINING_IMAGE
+              value: hello-world
+            - name: SERVING_IMAGE
+              value: nginx
+            - name: SERVING_PORT
+              value: "80"
+            - name: PERSISTENCE_SERVICE_URI
+              value: http://persistence-service.mlaas.svc.cluster.local:5000
+            - name: DOMAIN
+              value: "mlaas.aocc.at" #change
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: operator-service
+  namespace: mlaas
+spec:
+  ports:
+    - port: 80
+      targetPort: 5000
+  selector:
+    app: operator
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: operator-ingress
+  namespace: mlaas
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /controller
+spec:
+  rules:
+  - host: mlaas.aocc.at #change
+    http:
+      paths:
+      - path: /controller
+        pathType: Prefix
+        backend:
+          service:
+            name: operator-service
+            port:
+              number: 80
