@@ -1,7 +1,7 @@
 name: Build, Test and Push Training Servcie to GitHub Container Registry
 on:
   push:
-    branches: [ "main", "dev", "feature/ml-training-service" ]
+    branches: ["feature/ml-training-service" ]
   pull_request:
     branches: [ "main", "dev" ]
   workflow_dispatch:

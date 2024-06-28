@@ -1,7 +1,7 @@
 name: Build, Test and Push Frontend to GitHub Container Registry
 on:
   push:
-    branches: [ "main", "dev", "feature/frontend" ]
+    branches: ["feature/frontend" ]
   pull_request:
     branches: [ "main", "dev" ]
   workflow_dispatch:

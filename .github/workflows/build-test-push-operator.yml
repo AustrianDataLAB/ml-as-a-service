@@ -1,7 +1,7 @@
 name: Build, Test and Push Operator Servcie to GitHub Container Registry
 on:
   push:
-    branches: [ "main", "dev", "feature/operator" ]
+    branches: ["feature/operator" ]
   pull_request:
     branches: [ "main", "dev" ]
   workflow_dispatch:
