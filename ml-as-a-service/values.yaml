@@ -1,0 +1,341 @@
+# Default values for ml-as-a-service.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+kubernetesClusterDomain: cluster.local
+
+################ OPERATOR ################
+
+operator:
+  enabled: true
+  config:
+    training:
+      image: "ghcr.io/austriandatalab/ml-as-a-service:feature-ml-training-service"
+    serving:
+      image: "ghcr.io/austriandatalab/ml-as-a-service:feature-ml-serving-service"
+      port: 80
+    domain: "http://mlaas.westeurope.cloudapp.azure.com"
+    # todo PERSISTENCE_SERVICE_URI
+    rbacRules:
+    - apiGroups: ["batch"]
+      resources: ["jobs"]
+      verbs: ["create", "get", "list", "delete"]
+    - apiGroups: ["apps"]
+      resources: ["deployments"]
+      verbs: ["create", "get", "list", "delete"]
+    - apiGroups: [""]
+      resources: ["namespaces"]
+      verbs: ["create", "get"]
+    - apiGroups: [""]
+      resources: ["configmaps", "services"]
+      verbs: ["create", "get", "list", "delete"]
+    - apiGroups: ["networking.k8s.io"]
+      resources: ["ingresses"]
+      verbs: ["create", "get", "list", "delete"]
+
+  replicaCount: 1
+
+  image:
+    repository: ghcr.io/austriandatalab/ml-as-a-service
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "feature-operator"
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: true
+    # Automatically mount a ServiceAccount's API credentials?
+    automount: true
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  podAnnotations: {}
+  podLabels: {}
+
+  podSecurityContext: {}
+    # fsGroup: 2000
+
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ingress:
+    enabled: false
+    className: "nginx-static"
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: mlaas.westeurope.cloudapp.azure.com
+        paths:
+          - path: /training
+            pathType: ImplementationSpecific
+          - path: /serving
+            pathType: ImplementationSpecific
+    tls: 
+      - secretName: mlaas-tls-prod
+        hosts:
+          - mlaas.westeurope.cloudapp.azure.com
+
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  # Additional volumes on the output Deployment definition.
+  volumes: []
+  # - name: foo
+  #   secret:
+  #     secretName: mysecret
+  #     optional: false
+
+  # Additional volumeMounts on the output Deployment definition.
+  volumeMounts: []
+  # - name: foo
+  #   mountPath: "/etc/foo"
+  #   readOnly: true
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+
+################ FRONTEND ################
+
+frontend:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ghcr.io/austriandatalab/ml-as-a-service
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "feature-frontend"
+
+  podAnnotations: {}
+  podLabels: {}
+
+  podSecurityContext: {}
+  # fsGroup: 2000
+
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+  # runAsUser: 1000
+
+  service:
+    type: ClusterIP
+    port: 80
+    targetport: 80
+
+  ingress:
+    enabled: false
+    className: "nginx-static"
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: mlaas.westeurope.cloudapp.azure.com
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls: 
+      - secretName: mlaas-tls-prod
+        hosts:
+          - mlaas.westeurope.cloudapp.azure.com
+
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+  #   memory: 128Mi
+  
+  livenessProbe:
+    tcpSocket:
+      port: 80
+    initialDelaySeconds: 30
+  readinessProbe:
+    tcpSocket:
+      port: 80
+    initialDelaySeconds: 15
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  # Additional volumes on the output Deployment definition.
+  volumes: []
+  # - name: foo
+  #   secret:
+  #     secretName: mysecret
+  #     optional: false
+
+  # Additional volumeMounts on the output Deployment definition.
+  volumeMounts: []
+  # - name: foo
+  #   mountPath: "/etc/foo"
+  #   readOnly: true
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+
+################ PERSISTENCE ################
+persistence:
+  connectionString: "test123"
+
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ghcr.io/austriandatalab/ml-as-a-service
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "feature-persistence-service"
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: false
+    # Automatically mount a ServiceAccount's API credentials?
+    automount: true
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  podAnnotations: {}
+  podLabels: {}
+
+  podSecurityContext: {}
+    # fsGroup: 2000
+
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  service:
+    type: ClusterIP
+    port: 80
+    targetport: 80
+
+  ingress:
+    enabled: false
+    className: "nginx-static"
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: mlaas.westeurope.cloudapp.azure.com
+        paths:
+          - path: /data
+            pathType: ImplementationSpecific
+          - path: /model
+            pathType: ImplementationSpecific
+    tls: 
+      - secretName: mlaas-tls-prod
+        hosts:
+          - mlaas.westeurope.cloudapp.azure.com
+
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+  #   memory: 128Mi
+
+  livenessProbe:
+    httpGet:
+      path: /healthcheck
+      port: http
+  readinessProbe:
+    httpGet:
+      path: /healthcheck
+      port: http
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  # Additional volumes on the output Deployment definition.
+  volumes: []
+  # - name: foo
+  #   secret:
+  #     secretName: mysecret
+  #     optional: false
+
+  # Additional volumeMounts on the output Deployment definition.
+  volumeMounts: []
+  # - name: foo
+  #   mountPath: "/etc/foo"
+  #   readOnly: true
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
