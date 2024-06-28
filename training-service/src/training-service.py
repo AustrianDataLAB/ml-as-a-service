@@ -53,7 +53,7 @@ def clean_data(data_dir):
 def fetch_data(persistence_url, tenant, extract_path):
     try:
         response = requests.get(
-            f"{persistence_url}/data", headers={"Authorization": tenant}, stream=True
+            f"{persistence_url}/data", headers={"x-auth-request-user": tenant}, stream=True
         )
         print(response.status_code, persistence_url, tenant)
         if response.status_code == 200:
@@ -96,7 +96,7 @@ def transmit_data(persistence_url, tenant, config, model_path):
         # Prepare the files dictionary to send via requests
         files = {"file": (zip_filename, zip_buffer, "application/zip")}
 
-        response = requests.post(f"{persistence_url}/model", headers={"Authorization": tenant}, files=files,)
+        response = requests.post(f"{persistence_url}/model", headers={"x-auth-request-user": tenant}, files=files,)
 
         if response.status_code == 200:
             logging.info("File transmitted successfully")
